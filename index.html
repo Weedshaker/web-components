@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="./">
+    <title>Weedshaker's Web Components Example</title>
+</head>
+<body>
+    <script rel="modulepreload" type="module">
+        import './src/LinkFetch.js'
+        import './src/ShadowContainer.js'
+    </script>
+    <link-fetch fetchToId="container1">
+        <ul>
+            <li><a href="https://www.nzz.ch/" autoLoad="true">NZZ</a></li>
+            <li><a href="https://www.tagesanzeiger.ch">Tagesanzeiger</a></li>
+        </ul>
+    </link-fetch>
+    <shadow-container id="container1" iframeHeight="500px" iframeScrolling="yes"></shadow-container>
+</body>
+</html>

@@ -1,0 +1,3 @@
+[submodule "proxifyjs"]
+	path = proxifyjs
+	url = https://github.com/Weedshaker/ProxifyJS.git

@@ -1,0 +1,26 @@
+{
+  "name": "web-components",
+  "version": "1.0.0",
+  "description": "Weedshaker's Web Components",
+  "main": "index.html",
+  "scripts": {
+    "test": "standard --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Weedshaker/web-components.git"
+  },
+  "keywords": [
+    "web",
+    "component"
+  ],
+  "author": "Silvan Strübi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Weedshaker/web-components/issues"
+  },
+  "homepage": "https://github.com/Weedshaker/web-components#readme",
+  "devDependencies": {
+    "standard": "*"
+  }
+}
