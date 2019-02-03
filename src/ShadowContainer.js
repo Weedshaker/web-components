@@ -1,3 +1,5 @@
+/* global window */
+
 import SharedHTMLElement from './SharedHTMLElement.js'
 import { ProxifyHook } from '../proxifyjs/JavaScript/Classes/Helper/ProxifyHook.js'
 import { Proxify } from '../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
@@ -34,13 +36,27 @@ export default class ShadowContainer extends SharedHTMLElement {
     if (this.baseEl) this.baseEl.setAttribute('orig_href', this.baseEl.getAttribute('href'))
 
     this.iframeSize = [this.getAttribute('iframeWidth'), this.getAttribute('iframeHeight')]
-    if (this.getAttribute('href')) this.directLoadHref(this.getAttribute('href'));
+    if (this.getAttribute('href')) this.directLoadHref(this.getAttribute('href'))
+    if(this.getAttribute('history') === 'true'){
+      this.history = new Map()
+      window.addEventListener('popstate', event => {
+        if(event.state){
+          const newValue = this.history.get(event.state.timestamp)
+          if (newValue) this.attributeChangedCallback('content', '', newValue, true)
+        }
+      })
+    }
   }
   async directLoadHref(href){
     this.setAttribute('content', `${await this.load(href, this.getAttribute('parse') || undefined)}${this.htmlHrefSplit}${this.getAttribute('href')}`)
   }
-  async attributeChangedCallback (name, oldValue, newValue) {
+  async attributeChangedCallback (name, oldValue, newValue, notUpdateHistory = false) {
     if (name === 'content' && newValue) {
+      if(this.history && !notUpdateHistory){
+        const timestamp = Date.now()
+        this.history.set(timestamp, newValue)
+        history.pushState({timestamp}, '', '')
+      }
       const container = this.root || __(this)
       const [html, href] = newValue.split(this.htmlHrefSplit)
       // load it into an iframe (shadow dom does not sandbox js)
