@@ -1,7 +1,4 @@
-/* global customElements */
-/* global HTMLElement */
-/* global fetch */
-
+import SharedHTMLElement from './SharedHTMLElement.js'
 import { ProxifyHook } from '../proxifyjs/JavaScript/Classes/Helper/ProxifyHook.js'
 import { Proxify } from '../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
 import { Html } from '../proxifyjs/JavaScript/Classes/Traps/Dom/Html.js'
@@ -18,7 +15,7 @@ const __ = new ProxifyHook(Events(Html(Proxify()))).get()
 // parse:string = "text", "json", ... (default "text")
 // fetchToId:string = id of the content container to push text to as "content" attribute
 // autoLoad:boolean = (default "false")
-customElements.define('link-fetch', class LinkFetch extends HTMLElement {
+export default class LinkFetch extends SharedHTMLElement {
   constructor () {
     super()
 
@@ -54,13 +51,4 @@ customElements.define('link-fetch', class LinkFetch extends HTMLElement {
       this.addOnClick(childNode.childNodes) // recursive
     })
   }
-  async load (path, parse = 'text') {
-    try {
-      const response = await fetch(path)
-      return await response[parse]()
-    } catch (e) {
-      console.warn(`${path} could not be loaded: ${e.message}`)
-      return ''
-    }
-  }
-})
+}

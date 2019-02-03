@@ -1,6 +1,4 @@
-/* global customElements */
-/* global HTMLElement */
-
+import SharedHTMLElement from './SharedHTMLElement.js'
 import { ProxifyHook } from '../proxifyjs/JavaScript/Classes/Helper/ProxifyHook.js'
 import { Proxify } from '../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
 import { Chain } from '../proxifyjs/JavaScript/Classes/Traps/Misc/Chain.js'
@@ -20,10 +18,13 @@ const __ = new ProxifyHook(Events(Html(WebWorkers(Chain(Proxify()))))).get()
 // iframeBorder:string (default 0)
 // iframeOverflow:string (default "hidden")
 // changeTitle:boolean (default true)
-customElements.define('shadow-container', class ShadowContainer extends HTMLElement {
+// href:string = fetchPath
+export default class ShadowContainer extends SharedHTMLElement {
   static get observedAttributes () { return ['content'] }
   constructor () {
     super()
+
+    this.htmlHrefSplit = '|###|'
 
     const shadow = this.getAttribute('shadow') || 'open'
     if (shadow !== 'false') this.root = __(this.attachShadow({ mode: shadow }))
@@ -33,11 +34,15 @@ customElements.define('shadow-container', class ShadowContainer extends HTMLElem
     if (this.baseEl) this.baseEl.setAttribute('orig_href', this.baseEl.getAttribute('href'))
 
     this.iframeSize = [this.getAttribute('iframeWidth'), this.getAttribute('iframeHeight')]
+    if (this.getAttribute('href')) this.directLoadHref(this.getAttribute('href'));
+  }
+  async directLoadHref(href){
+    this.setAttribute('content', `${await this.load(href, this.getAttribute('parse') || undefined)}${this.htmlHrefSplit}${this.getAttribute('href')}`)
   }
   async attributeChangedCallback (name, oldValue, newValue) {
     if (name === 'content' && newValue) {
       const container = this.root || __(this)
-      const [html, href] = newValue.split('|###|')
+      const [html, href] = newValue.split(this.htmlHrefSplit)
       // load it into an iframe (shadow dom does not sandbox js)
       if ((!html || html.includes('<script')) && href) {
         container
@@ -100,4 +105,4 @@ customElements.define('shadow-container', class ShadowContainer extends HTMLElem
       return null
     }
   }
-})
+}
