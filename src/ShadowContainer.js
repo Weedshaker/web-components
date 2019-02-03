@@ -20,6 +20,7 @@ const __ = new ProxifyHook(Events(Html(WebWorkers(Chain(Proxify()))))).get()
 // iframeBorder:string (default 0)
 // iframeOverflow:string (default "hidden")
 // changeTitle:boolean (default true)
+// history:boolean (default false)
 // href:string = fetchPath
 export default class ShadowContainer extends SharedHTMLElement {
   static get observedAttributes () { return ['content'] }
