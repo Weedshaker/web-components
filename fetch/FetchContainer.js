@@ -36,7 +36,7 @@ export default class FetchContainer extends SharedHTMLElement {
 
     this.titleEl = __(document.getElementsByTagName('title')[0])
     this.baseEl = __(document.getElementsByTagName('base')[0])
-    if (this.baseEl) this.baseEl.setAttribute('orig_href', this.baseEl.getAttribute('href'))
+    if (this.baseEl && !this.baseEl.getAttribute('orig_href')) this.baseEl.setAttribute('orig_href', this.baseEl.getAttribute('href'))
 
     this.iframeSize = [this.getAttribute('iframeWidth'), this.getAttribute('iframeHeight')]
     if (this.getAttribute('href')) this.directLoadHref(this.getAttribute('href'))
