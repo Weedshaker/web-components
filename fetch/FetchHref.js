@@ -1,4 +1,4 @@
-import SharedHTMLElement from './SharedHTMLElement.js'
+import SharedHTMLElement from './SharedFetchElement.js'
 import { ProxifyHook } from '../proxifyjs/JavaScript/Classes/Helper/ProxifyHook.js'
 import { Proxify } from '../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
 import { Html } from '../proxifyjs/JavaScript/Classes/Traps/Dom/Html.js'
@@ -6,6 +6,7 @@ import { Events } from '../proxifyjs/JavaScript/Classes/Traps/Dom/Events.js'
 
 const __ = new ProxifyHook(Events(Html(Proxify()))).get()
 
+// This container grabs all its childrens href's and adds onclick behavior to it, where it pushes fetched href contents to an other element with the specified id. Useful for Singlepage Menus.
 // Attributes:
 // ---applies to root only---
 // shadow:string = "false", "open", "closed" (default "open")
@@ -15,7 +16,8 @@ const __ = new ProxifyHook(Events(Html(Proxify()))).get()
 // parse:string = "text", "json", ... (default "text")
 // fetchToId:string = id of the content container to push text to as "content" attribute
 // autoLoad:boolean = (default "false")
-export default class LinkFetch extends SharedHTMLElement {
+// lazy:boolean = (default "false")
+export default class FetchHref extends SharedHTMLElement {
   constructor () {
     super()
 

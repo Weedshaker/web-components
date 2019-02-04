@@ -2,7 +2,7 @@
 /* global fetch */
 
 // lazy:boolean = (default "false")
-export default class SharedHTMLElement extends HTMLElement {
+export default class SharedFetchElement extends HTMLElement {
     // TODO: add lazy load functionality when el is in screen bounds => https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
     constructor(){
         super()
@@ -29,6 +29,7 @@ export default class SharedHTMLElement extends HTMLElement {
                     resolve(await this._load(path, parse))
                 })
         })
+        this.loadCommands = []
         this.load = this._load // restore normal behavior after intersected
         observer.disconnect()
     }

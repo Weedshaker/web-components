@@ -1,6 +1,6 @@
 /* global window */
 
-import SharedHTMLElement from './SharedHTMLElement.js'
+import SharedHTMLElement from './SharedFetchElement.js'
 import { ProxifyHook } from '../proxifyjs/JavaScript/Classes/Helper/ProxifyHook.js'
 import { Proxify } from '../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
 import { Chain } from '../proxifyjs/JavaScript/Classes/Traps/Misc/Chain.js'
@@ -10,6 +10,7 @@ import { Events } from '../proxifyjs/JavaScript/Classes/Traps/Dom/Events.js'
 
 const __ = new ProxifyHook(Events(Html(WebWorkers(Chain(Proxify()))))).get()
 
+// This container fetches its content by the href set to it or receives content by the content attribute. It will sandbox css in the ShadowDom and js in an iframe.
 // Attributes:
 // ---applies to root only---
 // shadow:string = "false", "open", "closed" (default "open")
@@ -19,10 +20,11 @@ const __ = new ProxifyHook(Events(Html(WebWorkers(Chain(Proxify()))))).get()
 // iframeScrolling:string (default "no")
 // iframeBorder:string (default 0)
 // iframeOverflow:string (default "hidden")
-// changeTitle:boolean (default true)
+// changeTitle:boolean (default false)
 // history:boolean (default false)
 // href:string = fetchPath
-export default class ShadowContainer extends SharedHTMLElement {
+// lazy:boolean = (default "false")
+export default class FetchContainer extends SharedHTMLElement {
   static get observedAttributes () { return ['content'] }
   constructor () {
     super()
@@ -53,11 +55,6 @@ export default class ShadowContainer extends SharedHTMLElement {
   }
   async attributeChangedCallback (name, oldValue, newValue, notUpdateHistory = false) {
     if (name === 'content' && newValue) {
-      if(this.history && !notUpdateHistory){
-        const timestamp = Date.now()
-        this.history.set(timestamp, newValue)
-        history.pushState({timestamp}, '', '')
-      }
       const container = this.root || __(this)
       const [html, href] = newValue.split(this.htmlHrefSplit)
       // load it into an iframe (shadow dom does not sandbox js)
@@ -102,9 +99,15 @@ export default class ShadowContainer extends SharedHTMLElement {
         if (this.baseEl) this.baseEl.setAttribute('href', this.baseEl.getAttribute('orig_href')) // reset the base url to the original parameter
       }
       this.setAttribute(name, '') // clear the attribute after applying it to innerHTML
-      if (this.titleEl && this.getAttribute('changeTitle') !== 'false') {
-        const newTitleEl = container.getElementsByTagName('title')[0] || await __(this).$wwGetTitle(null, html)
+      let newTitleEl = ''
+      if (this.titleEl && this.getAttribute('changeTitle') === 'true') {
+        newTitleEl = container.getElementsByTagName('title')[0] || await __(this).$wwGetTitle(null, html)
         if (newTitleEl) this.titleEl.$setInnerText(newTitleEl.innerText || newTitleEl)
+      }
+      if (this.history && !notUpdateHistory) {
+        const timestamp = Date.now()
+        this.history.set(timestamp, newValue)
+        history.pushState({ timestamp }, newTitleEl.innerText || newTitleEl, '')
       }
     }
   }
@@ -112,14 +115,14 @@ export default class ShadowContainer extends SharedHTMLElement {
     try {
       return /.*<base.*?href="(.*?)".*?>/mgi.exec(text)[1]
     } catch (e) {
-      return null
+      return ''
     }
   }
   getTitle (text) {
     try {
       return /.*<title>(.*?)<\/title>/mgi.exec(text)[1]
     } catch (e) {
-      return null
+      return ''
     }
   }
 }
