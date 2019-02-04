@@ -17,7 +17,7 @@ export default class SharedFetchElement extends HTMLElement {
             }
             new IntersectionObserver(this.handleIntersect.bind(this), {
                 root: null,
-                rootMargin: "0px",
+                rootMargin: '0px',
                 threshold: 0.5
             }).observe(this)
         }
