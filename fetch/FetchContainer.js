@@ -1,4 +1,5 @@
 /* global window */
+/* global history */
 
 import SharedHTMLElement from './SharedFetchElement.js'
 import { ProxifyHook } from '../proxifyjs/JavaScript/Classes/Helper/ProxifyHook.js'
@@ -41,25 +42,25 @@ export default class FetchContainer extends SharedHTMLElement {
 
     this.iframeSize = [this.getAttribute('iframeWidth'), this.getAttribute('iframeHeight')]
     if (this.getAttribute('href')) this.directLoadHref(this.getAttribute('href'))
-    if(this.getAttribute('history') === 'true'){
+    if (this.getAttribute('history') === 'true') {
       this.history = new Map()
       window.addEventListener('popstate', event => {
-        if(event.state){
+        if (event.state) {
           const newValue = this.history.get(event.state.timestamp)
           if (newValue) this.attributeChangedCallback('content', '', newValue, true)
         }
       })
     }
   }
-  async directLoadHref(href){
+  async directLoadHref (href) {
     this.setAttribute('content', `${await this.load(href, this.getAttribute('parse') || undefined)}${this.htmlHrefSplit}${this.getAttribute('href')}`)
   }
   async attributeChangedCallback (name, oldValue, newValue, notUpdateHistory = false) {
-    if(name === 'content' && newValue){
+    if (name === 'content' && newValue) {
       const container = this.root || __(this)
       const [html, href] = newValue.split(this.htmlHrefSplit)
       // load it into an iframe (shadow dom does not sandbox js)
-      if(this.getAttribute('useIframe') !== 'false' && (!html || html.includes('<script')) && href){
+      if (this.getAttribute('useIframe') !== 'false' && (!html || html.includes('<script')) && href) {
         container
           .$setInnerHTML('')
           .appendChild(__('iframe'))
@@ -74,15 +75,15 @@ export default class FetchContainer extends SharedHTMLElement {
               .$setWidth(this.iframeSize[0] || '100%')
           })
           .$func((receiver) => {
-            if(!this.iframeSize[1]){
+            if (!this.iframeSize[1]) {
               receiver.$onload((event, memory, target, prop, receiver) => {
                 const iframeDoc = receiver.contentDocument ? receiver.contentDocument : receiver.contentWindow.document
                 const getHeight = () => Math.max(iframeDoc.body.scrollHeight, iframeDoc.body.offsetHeight, iframeDoc.documentElement.clientHeight, iframeDoc.documentElement.scrollHeight, iframeDoc.documentElement.offsetHeight)
                 const interval = setInterval(() => {
                   receiver.$getStyle((receiver, prop, style) => {
-                    if(style.$getMinHeight() !== `${getHeight()}px`){
+                    if (style.$getMinHeight() !== `${getHeight()}px`) {
                       style.$setMinHeight(`${getHeight()}px`)
-                    }else{
+                    } else {
                       clearInterval(interval)
                     }
                   })
@@ -91,8 +92,8 @@ export default class FetchContainer extends SharedHTMLElement {
             }
           })
       // load it straight into the shadow dom
-      }else if(html){
-        if(this.baseEl){
+      } else if (html) {
+        if (this.baseEl) {
           const newBaseElHref = href ? href.replace(/[^/]*?$/, '') : await __(this).$wwGetBase(null, html)
           if (newBaseElHref) this.baseEl.setAttribute('href', newBaseElHref)
         }
@@ -101,11 +102,11 @@ export default class FetchContainer extends SharedHTMLElement {
       }
       this.setAttribute(name, '') // clear the attribute after applying it to innerHTML
       let newTitleEl = ''
-      if(this.titleEl && this.getAttribute('changeTitle') === 'true'){
+      if (this.titleEl && this.getAttribute('changeTitle') === 'true') {
         newTitleEl = container.getElementsByTagName('title')[0] || await __(this).$wwGetTitle(null, html)
         if (newTitleEl) this.titleEl.$setInnerText(newTitleEl.innerText || newTitleEl)
       }
-      if(this.history && !notUpdateHistory){
+      if (this.history && !notUpdateHistory) {
         const timestamp = Date.now()
         this.history.set(timestamp, newValue)
         history.pushState({ timestamp }, newTitleEl.innerText || newTitleEl, '')
