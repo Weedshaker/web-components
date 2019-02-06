@@ -1,5 +1,6 @@
 /* global HTMLElement */
 /* global fetch */
+/* global window */
 
 // lazy:boolean = (default "false")
 export default class SharedFetchElement extends HTMLElement {
@@ -7,7 +8,7 @@ export default class SharedFetchElement extends HTMLElement {
     constructor(){
         super()
 
-        if(this.getAttribute('lazy') === 'true'){
+        if (window.IntersectionObserver && this.getAttribute('lazy') === 'true'){
             this.loadCommands = []
             this._load = this.load
             this.load = (path, parse) => {

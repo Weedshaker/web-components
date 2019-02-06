@@ -23,8 +23,13 @@ export default class FetchHref extends SharedHTMLElement {
 
     const shadow = this.getAttribute('shadow') || 'open'
     if (shadow !== 'false') this.root = __(this.attachShadow({ mode: shadow })).$appendChildren(Array.from(this.childNodes))
-  
-    this.addOnClick(__((this.root || __(this)).childNodes))
+  }
+  connectedCallback () {
+    if(!this.initialized){
+      const container = this.root || __(this)
+      this.addOnClick(__(container.childNodes))
+      this.initialized = true
+    }
   }
   addOnClick (childNodes) {
     Array.from(childNodes).forEach(childNode => {
