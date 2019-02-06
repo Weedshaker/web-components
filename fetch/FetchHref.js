@@ -36,11 +36,14 @@ export default class FetchHref extends SharedHTMLElement {
       let href = ''
       if(typeof childNode.getAttribute === 'function' && (href = childNode.getAttribute('href')) && href.length !== 0){
         childNode.$onclick([
-          async (event, memory, target, prop, receiver) => {
+          (event, memory, target, prop, receiver) => {
             event.preventDefault()
-            if (!memory.raw) memory.raw = await this.load(href, childNode.getAttribute('parse') || this.getAttribute('parse') || undefined)
-            const individuelContentEl = document.getElementById(childNode.getAttribute('fetchToId') || this.getAttribute('fetchToId') || 'container')
-            if (individuelContentEl) individuelContentEl.setAttribute('content', `${memory.raw}|###|${href}`) // trigger life cycle event
+            const applyContent = async () => {
+              if (!memory.raw) memory.raw = await this.load(href, childNode.getAttribute('parse') || this.getAttribute('parse') || undefined)
+              const individuelContentEl = document.getElementById(childNode.getAttribute('fetchToId') || this.getAttribute('fetchToId') || 'container')
+              if (individuelContentEl) individuelContentEl.setAttribute('content', `${memory.raw}|###|${href}`) // trigger life cycle event
+            }
+            applyContent()
           },
           {
             raw: ''
