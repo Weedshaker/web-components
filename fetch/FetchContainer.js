@@ -77,11 +77,12 @@ export default class FetchContainer extends SharedHTMLElement {
           .$func((receiver) => {
             if (!this.iframeSize[1]) {
               receiver.$onload((event, memory, target, prop, receiver) => {
+                const tollerance = 5 // this is typically 4px, due to scrollbars thats always added when set new min-height
                 const iframeDoc = receiver.contentDocument ? receiver.contentDocument : receiver.contentWindow.document
                 const getHeight = () => Math.max(iframeDoc.body.scrollHeight, iframeDoc.body.offsetHeight, iframeDoc.documentElement.clientHeight, iframeDoc.documentElement.scrollHeight, iframeDoc.documentElement.offsetHeight)
                 const interval = setInterval(() => {
                   receiver.$getStyle((receiver, prop, style) => {
-                    if (style.$getMinHeight() !== `${getHeight()}px`) {
+                    if ((Number(style.$getMinHeight().replace('px', '')) || 0) + tollerance < getHeight()) {
                       style.$setMinHeight(`${getHeight()}px`)
                     } else {
                       clearInterval(interval)
