@@ -6,10 +6,9 @@ import { ProxifyHook } from '../proxifyjs/JavaScript/Classes/Helper/ProxifyHook.
 import { Proxify } from '../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
 import { Chain } from '../proxifyjs/JavaScript/Classes/Traps/Misc/Chain.js'
 import { WebWorkers } from '../proxifyjs/JavaScript/Classes/Traps/Misc/WebWorkers.js'
-import { Html } from '../proxifyjs/JavaScript/Classes/Traps/Dom/Html.js'
 import { Events } from '../proxifyjs/JavaScript/Classes/Traps/Dom/Events.js'
 
-const __ = new ProxifyHook(Events(Html(WebWorkers(Chain(Proxify()))))).get()
+const __ = new ProxifyHook(Events(WebWorkers(Chain(Proxify())))).get()
 
 // This container fetches its content by the href set to it or receives content by the content attribute. It will sandbox css in the ShadowDom and js in an iframe.
 // Attributes:

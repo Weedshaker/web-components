@@ -23,6 +23,8 @@ export default class FetchHref extends SharedHTMLElement {
 
     const shadow = this.getAttribute('shadow') || 'open'
     if (shadow !== 'false') this.root = __(this.attachShadow({ mode: shadow })).$appendChildren(Array.from(this.childNodes))
+
+    this.allLinks = []
   }
   connectedCallback () {
     if (!this.initialized) {
@@ -34,16 +36,16 @@ export default class FetchHref extends SharedHTMLElement {
   addOnClick (childNodes) {
     Array.from(childNodes).forEach(childNode => {
       let href = ''
-      if (typeof childNode.getAttribute === 'function' && (href = childNode.getAttribute('href')) && href.length !== 0) {
-        childNode.$onclick([
+      if (typeof childNode.getAttribute === 'function' && childNode.getAttribute('rel') !== 'stylesheet' && (href = childNode.getAttribute('href')) && href.length !== 0) {
+        this.allLinks.push(childNode.$onclick([
           (event, memory, target, prop, receiver) => {
             event.preventDefault()
-            this.applyContent(childNode, href, memory)
+            this.applyContent(childNode, href, memory).then(() => Array.from(this.allLinks).forEach(link => link.classList[childNode === link ? 'add' : 'remove']('active')))
           },
           {
             raw: ''
           }
-        ])
+        ]))
         if ((childNode.getAttribute('autoLoad') && childNode.getAttribute('autoLoad') === 'true') || (!childNode.getAttribute('autoLoad') && this.getAttribute('autoLoad') && this.getAttribute('autoLoad') === 'true')) {
           childNode.click()
         }
