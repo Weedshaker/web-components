@@ -1,3 +1,5 @@
+/* global location */
+
 import SharedHTMLElement from './SharedFetchElement.js'
 import { ProxifyHook } from '../proxifyjs/JavaScript/Classes/Helper/ProxifyHook.js'
 import { Proxify } from '../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
@@ -46,7 +48,7 @@ export default class FetchHref extends SharedHTMLElement {
             raw: ''
           }
         ]))
-        if ((childNode.getAttribute('autoLoad') && childNode.getAttribute('autoLoad') === 'true') || (!childNode.getAttribute('autoLoad') && this.getAttribute('autoLoad') && this.getAttribute('autoLoad') === 'true')) {
+        if (location.hash === `#${childNode.innerHTML}` || (!location.hash && ((childNode.getAttribute('autoLoad') && childNode.getAttribute('autoLoad') === 'true') || (!childNode.getAttribute('autoLoad') && this.getAttribute('autoLoad') && this.getAttribute('autoLoad') === 'true')))) {
           childNode.click()
         }
       }

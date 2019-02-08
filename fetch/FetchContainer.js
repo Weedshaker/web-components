@@ -6,9 +6,10 @@ import { ProxifyHook } from '../proxifyjs/JavaScript/Classes/Helper/ProxifyHook.
 import { Proxify } from '../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
 import { Chain } from '../proxifyjs/JavaScript/Classes/Traps/Misc/Chain.js'
 import { WebWorkers } from '../proxifyjs/JavaScript/Classes/Traps/Misc/WebWorkers.js'
+import { Html } from '../proxifyjs/JavaScript/Classes/Traps/Dom/Html.js'
 import { Events } from '../proxifyjs/JavaScript/Classes/Traps/Dom/Events.js'
 
-const __ = new ProxifyHook(Events(WebWorkers(Chain(Proxify())))).get()
+const __ = new ProxifyHook(Events(Html(WebWorkers(Chain(Proxify()))))).get()
 
 // This container fetches its content by the href set to it or receives content by the content attribute. It will sandbox css in the ShadowDom and js in an iframe.
 // Attributes:
@@ -34,6 +35,8 @@ export default class FetchContainer extends SharedHTMLElement {
 
     const shadow = this.getAttribute('shadow') || 'open'
     if (shadow !== 'false') this.root = __(this.attachShadow({ mode: shadow }))
+
+    this.origChildNodes = Array.from(this.childNodes)
 
     this.titleEl = document.getElementsByTagName('title')[0] && __(document.getElementsByTagName('title')[0])
     this.baseEl = document.getElementsByTagName('base')[0] && __(document.getElementsByTagName('base')[0])
@@ -78,6 +81,8 @@ export default class FetchContainer extends SharedHTMLElement {
               receiver.$onload((event, memory, target, prop, receiver) => {
                 const tollerance = 5 // this is typically 4px, due to scrollbars thats always added when set new min-height
                 const iframeDoc = receiver.contentDocument ? receiver.contentDocument : receiver.contentWindow.document
+                let iframeBody
+                if ((iframeBody = iframeDoc.getElementsByTagName('body')[0])) iframeBody.$appendChildren(this.origChildNodes)
                 const getHeight = () => Math.max(iframeDoc.body.scrollHeight, iframeDoc.body.offsetHeight, iframeDoc.documentElement.clientHeight, iframeDoc.documentElement.scrollHeight, iframeDoc.documentElement.offsetHeight)
                 const interval = setInterval(() => {
                   receiver.$getStyle((receiver, prop, style) => {
@@ -99,6 +104,7 @@ export default class FetchContainer extends SharedHTMLElement {
         }
         container.$setInnerHTML(html)
         if (this.baseEl) this.baseEl.setAttribute('href', this.baseEl.getAttribute('orig_href')) // reset the base url to the original parameter
+        container.$appendChildren(Array.from(this.childNodes))
       }
       this.setAttribute(name, '') // clear the attribute after applying it to innerHTML
       let newTitleEl = ''
