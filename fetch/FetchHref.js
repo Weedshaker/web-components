@@ -12,6 +12,7 @@ const __ = new ProxifyHook(Events(Html(Proxify()))).get()
 // Attributes:
 // ---applies to root only---
 // shadow:string = "false", "open", "closed" (default "open")
+// setHash:boolean = (default "false")
 // ---applies to href el only---
 // href:string = fetchPath
 // ---applies to both with prio href el---
@@ -42,13 +43,16 @@ export default class FetchHref extends SharedHTMLElement {
         this.allLinks.push(childNode.$onclick([
           (event, memory, target, prop, receiver) => {
             event.preventDefault()
-            this.applyContent(childNode, href, memory).then(() => Array.from(this.allLinks).forEach(link => link.classList[childNode === link ? 'add' : 'remove']('active')))
+            this.applyContent(childNode, href, memory).then(() => {
+              Array.from(this.allLinks).forEach(link => link.classList[childNode === link ? 'add' : 'remove']('active'))
+              if (this.getAttribute('setHash') === 'true') location.hash = `#${childNode.innerHTML}`
+            })
           },
           {
             raw: ''
           }
         ]))
-        if (location.hash === `#${childNode.innerHTML}` || (!location.hash && ((childNode.getAttribute('autoLoad') && childNode.getAttribute('autoLoad') === 'true') || (!childNode.getAttribute('autoLoad') && this.getAttribute('autoLoad') && this.getAttribute('autoLoad') === 'true')))) {
+        if (location.hash === `#${childNode.innerHTML}` || (!location.hash && (childNode.getAttribute('autoLoad') === 'true' || this.getAttribute('autoLoad') === 'true'))) {
           childNode.click()
         }
       }

@@ -67,7 +67,7 @@ export default class FetchContainer extends SharedHTMLElement {
           .$setInnerHTML('')
           .appendChild(__('iframe'))
           .$setSrc(href)
-          .$_setAttribute('seamless', (this.getAttribute('iframeSeamless') && this.getAttribute('iframeSeamless') === 'true') || true)
+          .$_setAttribute('seamless', this.getAttribute('iframeSeamless') !== 'false')
           .$_setAttribute('scrolling', this.getAttribute('iframeScrolling') || 'no')
           .$getStyle((receiver, prop, style) => {
             style
