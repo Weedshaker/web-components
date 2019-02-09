@@ -28,6 +28,12 @@ export default class FetchHref extends SharedHTMLElement {
     if (shadow !== 'false') this.root = __(this.attachShadow({ mode: shadow })).$appendChildren(Array.from(this.childNodes))
 
     this.allLinks = []
+
+    if (this.getAttribute('setHash') === 'true') {
+      window.addEventListener('hashchange', event => {
+        this.allLinks.forEach(link => link.classList[location.hash === `#${link.innerHTML}` ? 'add' : 'remove']('active'))
+      })
+    }
   }
   connectedCallback () {
     if (!this.initialized) {
@@ -43,9 +49,9 @@ export default class FetchHref extends SharedHTMLElement {
         this.allLinks.push(childNode.$onclick([
           (event, memory, target, prop, receiver) => {
             event.preventDefault()
+            if (this.getAttribute('setHash') === 'true') location.hash = `#${childNode.innerHTML}`
             this.applyContent(childNode, href, memory).then(() => {
-              Array.from(this.allLinks).forEach(link => link.classList[childNode === link ? 'add' : 'remove']('active'))
-              if (this.getAttribute('setHash') === 'true') location.hash = `#${childNode.innerHTML}`
+              this.allLinks.forEach(link => link.classList[childNode === link ? 'add' : 'remove']('active'))
             })
           },
           {

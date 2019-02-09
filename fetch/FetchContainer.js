@@ -1,5 +1,6 @@
 /* global window */
 /* global history */
+/* global location */
 
 import SharedHTMLElement from './SharedFetchElement.js'
 import { ProxifyHook } from '../proxifyjs/JavaScript/Classes/Helper/ProxifyHook.js'
@@ -104,7 +105,7 @@ export default class FetchContainer extends SharedHTMLElement {
         }
         container.$setInnerHTML(html)
         if (this.baseEl) this.baseEl.setAttribute('href', this.baseEl.getAttribute('orig_href')) // reset the base url to the original parameter
-        container.$appendChildren(Array.from(this.childNodes))
+        container.$appendChildren(this.origChildNodes)
       }
       this.setAttribute(name, '') // clear the attribute after applying it to innerHTML
       let newTitleEl = ''
@@ -115,7 +116,7 @@ export default class FetchContainer extends SharedHTMLElement {
       if (this.history && !notUpdateHistory) {
         const timestamp = Date.now()
         this.history.set(timestamp, newValue)
-        history.pushState({ timestamp }, newTitleEl.innerText || newTitleEl, '')
+        history[location.hash ? 'replaceState' : 'pushState']({ timestamp }, newTitleEl.innerText || newTitleEl, location.hash)
       }
     }
   }
