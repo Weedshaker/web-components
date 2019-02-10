@@ -16,6 +16,7 @@ const __ = new ProxifyHook(Events(Html(WebWorkers(Chain(Proxify()))))).get()
 // Attributes:
 // ---applies to root only---
 // shadow:string = "false", "open", "closed" (default "open")
+// useJSinShadow:boolean (default false) // this only works when useIframe="false"
 // useIframe:boolean (default true)
 // iframeWidth:string (default 100%)
 // iframeHeight:string (default 100%)
@@ -104,6 +105,7 @@ export default class FetchContainer extends SharedHTMLElement {
           if (newBaseElHref) this.baseEl.setAttribute('href', newBaseElHref)
         }
         container.$setInnerHTML(html)
+        if (this.getAttribute('useJSinShadow') === 'true') this.activateJS(container)
         if (this.baseEl) this.baseEl.setAttribute('href', this.baseEl.getAttribute('orig_href')) // reset the base url to the original parameter
         container.$appendChildren(this.origChildNodes)
       }
@@ -133,5 +135,13 @@ export default class FetchContainer extends SharedHTMLElement {
     } catch (e) {
       return ''
     }
+  }
+  activateJS (container) {
+    Array.from(container.getElementsByTagName('script')).forEach(script => {
+      const newScript = document.createElement('script')
+      if (script.innerHTML) newScript.innerHTML = script.innerHTML
+      if (script.src) newScript.src = script.src
+      script.parentNode.replaceChild(newScript, script)
+    })
   }
 }
