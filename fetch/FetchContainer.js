@@ -65,6 +65,8 @@ export default class FetchContainer extends SharedHTMLElement {
       const [html, href] = newValue.split(this.htmlHrefSplit)
       // load it into an iframe (shadow dom does not sandbox js)
       if (this.getAttribute('useIframe') !== 'false' && (!html || html.includes('<script')) && href) {
+        container.host.classList.add('iframe')
+        container.host.classList.remove('html')
         container
           .$setInnerHTML('')
           .appendChild(__('iframe'))
@@ -100,6 +102,8 @@ export default class FetchContainer extends SharedHTMLElement {
           })
       // load it straight into the shadow dom
       } else if (html) {
+        container.host.classList.add('html')
+        container.host.classList.remove('iframe')
         if (this.baseEl) {
           const newBaseElHref = href ? href.replace(/[^/]*?$/, '') : await __(this).$wwGetBase(null, html)
           if (newBaseElHref) this.baseEl.setAttribute('href', newBaseElHref)
