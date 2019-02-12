@@ -1,10 +1,56 @@
 import { SharedShadow } from '../shared/SharedShadow.js'
 
-// This container displays the actual year
+// This container displays a MenuIcon
+
+// color:string (default #333)
+// changeClass:string (default change)
+// barClass:string (default bar)
 export default class MenuIcon extends SharedShadow() {
   constructor (...args) {
     super(...args)
 
-    this.container.innerHTML = (new Date()).getFullYear()
+    this.querySelected =  document.querySelector(this.getAttribute('querySelector'))
+    this.width = this.getAttribute('width') ? this.getAttribute('width') : '35px'
+    this.height = this.getAttribute('height') ? this.getAttribute('height') : '5px'
+    this.openClass = this.getAttribute('openClass') ? this.getAttribute('openClass') : 'open'
+    this.barClass = this.getAttribute('barClass') ? this.getAttribute('barClass') : 'bar'
+    this.container.innerHTML = `
+    <style>
+      :host {
+        display: inline-block;
+        cursor: pointer;
+      }
+      .${this.barClass}1, .${this.barClass}2, .${this.barClass}3 {
+        width: ${this.width};
+        height: ${this.height};
+        background-color: ${this.getAttribute('color') ? this.getAttribute('color') : 'var(--color-font1, #333)'};
+        margin: 0;
+        transition: 0.4s;
+      }
+      .${this.barClass}2 {
+        margin: ${this.height} 0;
+      }
+      /* Rotate first ${this.barClass} */
+      :host(.${this.openClass}) .${this.barClass}1 {
+        transform: rotate(-45deg) translateY(calc(${this.height} * 5.5 / 2));
+      }
+      /* Fade out the second ${this.barClass} */
+      :host(.${this.openClass}) .${this.barClass}2 {
+        opacity: 0;
+      }
+      /* Rotate last ${this.barClass} */
+      :host(.${this.openClass}) .${this.barClass}3 {
+        transform: rotate(45deg) translateY(calc(-${this.height} * 5.5 / 2));
+      }
+    </style>
+    <div class="${this.barClass}1"></div>
+    <div class="${this.barClass}2"></div>
+    <div class="${this.barClass}3"></div>
+    `
+    this.addEventListener('click', this.toggleAnimationClass.bind(this))
   }
+  toggleAnimationClass(divCont) {
+    this.classList.toggle(this.openClass)
+    if (this.querySelected) this.querySelected.classList.toggle(this.openClass)
+  } 
 }
