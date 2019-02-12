@@ -1,6 +1,6 @@
 /* global location */
 
-import SharedHTMLElement from './SharedFetchElement.js'
+import SharedFetch from './SharedFetch.js'
 import { ProxifyHook } from '../proxifyjs/JavaScript/Classes/Helper/ProxifyHook.js'
 import { Proxify } from '../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
 import { Html } from '../proxifyjs/JavaScript/Classes/Traps/Dom/Html.js'
@@ -20,12 +20,12 @@ const __ = new ProxifyHook(Events(Html(Proxify()))).get()
 // fetchToId:string = id of the content container to push text to as "content" attribute
 // autoLoad:boolean = (default "false")
 // lazy:boolean = (default "false")
-export default class FetchHref extends SharedHTMLElement {
-  constructor () {
-    super()
+export default class FetchHref extends SharedFetch {
+  constructor (...args) {
+    super(...args)
 
-    const shadow = this.getAttribute('shadow') || 'open'
-    if (shadow !== 'false') this.root = __(this.attachShadow({ mode: shadow })).$appendChildren(Array.from(this.childNodes))
+    // copy children to shadow, if shadow (this.root) exists
+    if (this.root) this.root = __(this.root).$appendChildren(Array.from(this.childNodes))
 
     this.allLinks = []
 
@@ -37,8 +37,8 @@ export default class FetchHref extends SharedHTMLElement {
   }
   connectedCallback () {
     if (!this.initialized) {
-      const container = this.root || __(this)
-      this.addOnClick(__(container.childNodes))
+      const container = __(this.container)
+      this.addOnClick(container.childNodes)
       this.initialized = true
     }
   }

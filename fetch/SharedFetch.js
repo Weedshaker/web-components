@@ -1,13 +1,13 @@
-/* global HTMLElement */
 /* global fetch */
 /* global window */
 /* global IntersectionObserver */
 
+import { SharedShadow } from '../shared/SharedShadow.js'
+
 // lazy:boolean = (default "false")
-export default class SharedFetchElement extends HTMLElement {
-  // TODO: add lazy load functionality when el is in screen bounds => https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
-  constructor () {
-    super()
+export default class SharedFetch extends SharedShadow() {
+  constructor (...args) {
+    super(...args)
 
     if (window.IntersectionObserver && this.getAttribute('lazy') === 'true') {
       this.loadCommands = []

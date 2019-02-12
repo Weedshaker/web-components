@@ -2,7 +2,7 @@
 /* global history */
 /* global location */
 
-import SharedHTMLElement from './SharedFetchElement.js'
+import SharedFetch from './SharedFetch.js'
 import { ProxifyHook } from '../proxifyjs/JavaScript/Classes/Helper/ProxifyHook.js'
 import { Proxify } from '../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
 import { Chain } from '../proxifyjs/JavaScript/Classes/Traps/Misc/Chain.js'
@@ -28,15 +28,12 @@ const __ = new ProxifyHook(Events(Html(WebWorkers(Chain(Proxify()))))).get()
 // history:boolean (default false)
 // href:string = fetchPath
 // lazy:boolean = (default "false")
-export default class FetchContainer extends SharedHTMLElement {
+export default class FetchContainer extends SharedFetch {
   static get observedAttributes () { return ['content'] }
-  constructor () {
-    super()
+  constructor (...args) {
+    super(...args)
 
     this.htmlHrefSplit = '|###|'
-
-    const shadow = this.getAttribute('shadow') || 'open'
-    if (shadow !== 'false') this.root = __(this.attachShadow({ mode: shadow }))
 
     this.origChildNodes = Array.from(this.childNodes)
 
@@ -61,7 +58,7 @@ export default class FetchContainer extends SharedHTMLElement {
   }
   async attributeChangedCallback (name, oldValue, newValue, notUpdateHistory = false) {
     if (name === 'content' && newValue) {
-      const container = this.root || __(this)
+      const container = __(this.container)
       const [html, href] = newValue.split(this.htmlHrefSplit)
       // load it into an iframe (shadow dom does not sandbox js)
       if (this.getAttribute('useIframe') !== 'false' && (!html || html.includes('<script')) && href) {
