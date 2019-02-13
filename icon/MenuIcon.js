@@ -13,7 +13,7 @@ export default class MenuIcon extends SharedShadow() {
   constructor (...args) {
     super(...args)
 
-    this.querySelected =  document.querySelector(this.getAttribute('querySelector'))
+    this.querySelected = document.querySelector(this.getAttribute('querySelector'))
     this.width = this.getAttribute('width') ? this.getAttribute('width') : '35px'
     this.height = this.getAttribute('height') ? this.getAttribute('height') : '5px'
     this.openClass = this.getAttribute('openClass') ? this.getAttribute('openClass') : 'open'
@@ -25,9 +25,11 @@ export default class MenuIcon extends SharedShadow() {
         display: inline-block;
         cursor: pointer;
         transition: ${this.transition};
+        padding-left: calc(${this.width} / 4) !important;
       }
       :host(.${this.openClass}) {
         padding-right: calc(${this.width} / 4) !important;
+        padding-left: 0 !important;
       }
       .${this.barClass}1, .${this.barClass}2, .${this.barClass}3 {
         width: ${this.width};
@@ -41,7 +43,7 @@ export default class MenuIcon extends SharedShadow() {
         transition: ${this.transition} / 2;
       }
       /* Rotate first ${this.barClass} */
-      :host(.${this.openClass}) .${this.barClass}1 {
+      :host(.${this.openClass}) .${this.barClass}1, :host(.${this.openClass}) .${this.barClass}2 {
         transform: rotate(-45deg) translateY(calc(${this.height} * 5.5 / 2));
       }
       /* Fade out the second ${this.barClass} */
@@ -59,8 +61,8 @@ export default class MenuIcon extends SharedShadow() {
     `
     this.addEventListener('click', this.toggleAnimationClass.bind(this))
   }
-  toggleAnimationClass(divCont) {
+  toggleAnimationClass (divCont) {
     this.classList.toggle(this.openClass)
     if (this.querySelected) this.querySelected.classList[this.classList.contains(this.openClass) ? 'add' : 'remove'](this.openClass)
-  } 
+  }
 }
