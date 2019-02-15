@@ -1,3 +1,5 @@
+/* global localStorage */
+
 import { SharedShadow } from '../shared/SharedShadow.js'
 
 // This container displays a MenuIcon

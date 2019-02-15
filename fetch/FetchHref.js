@@ -70,7 +70,7 @@ export default class FetchHref extends SharedFetch {
     const individuelContentEl = document.getElementById(childNode.getAttribute('fetchToId') || this.getAttribute('fetchToId') || 'container')
     if (individuelContentEl) individuelContentEl.setAttribute('content', `${memory.raw}|###|${href}`) // trigger life cycle event
   }
-  compareHashStrings(string1, string2){
+  compareHashStrings (string1, string2) {
     return string1.replace('#', '').replace(/%20/g, ' ') === string2.replace('#', '').replace(/%20/g, ' ')
   }
 }
