@@ -31,7 +31,7 @@ export default class FetchHref extends SharedFetch {
 
     if (this.getAttribute('setHash') === 'true') {
       window.addEventListener('hashchange', event => {
-        this.allLinks.forEach(link => link.classList[location.hash === `#${link.innerHTML}` ? 'add' : 'remove']('active'))
+        this.allLinks.forEach(link => link.classList[this.compareHashStrings(location.hash, link.innerHTML) ? 'add' : 'remove']('active'))
       })
     }
   }
@@ -45,7 +45,7 @@ export default class FetchHref extends SharedFetch {
   addOnClick (childNodes) {
     Array.from(childNodes).forEach(childNode => {
       let href = ''
-      if (typeof childNode.getAttribute === 'function' && childNode.getAttribute('rel') !== 'stylesheet' && (href = childNode.getAttribute('href')) && href.length !== 0) {
+      if (typeof childNode.getAttribute === 'function' && !childNode.getAttribute('rel') && (href = childNode.getAttribute('href')) && href.length !== 0) {
         this.allLinks.push(childNode.$onclick([
           (event, memory, target, prop, receiver) => {
             event.preventDefault()
@@ -58,7 +58,7 @@ export default class FetchHref extends SharedFetch {
             raw: ''
           }
         ]))
-        if (location.hash === `#${childNode.innerHTML}` || (!location.hash && (childNode.getAttribute('autoLoad') === 'true' || this.getAttribute('autoLoad') === 'true'))) {
+        if (this.compareHashStrings(location.hash, childNode.innerHTML) || (!location.hash && (childNode.getAttribute('autoLoad') === 'true' || this.getAttribute('autoLoad') === 'true'))) {
           childNode.click()
         }
       }
@@ -69,5 +69,8 @@ export default class FetchHref extends SharedFetch {
     if (!memory.raw) memory.raw = await this.load(href, childNode.getAttribute('parse') || this.getAttribute('parse') || undefined)
     const individuelContentEl = document.getElementById(childNode.getAttribute('fetchToId') || this.getAttribute('fetchToId') || 'container')
     if (individuelContentEl) individuelContentEl.setAttribute('content', `${memory.raw}|###|${href}`) // trigger life cycle event
+  }
+  compareHashStrings(string1, string2){
+    return string1.replace('#', '').replace(/%20/g, ' ') === string2.replace('#', '').replace(/%20/g, ' ')
   }
 }
