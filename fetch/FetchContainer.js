@@ -113,7 +113,7 @@ export default class FetchContainer extends SharedFetch {
       this.setAttribute(name, '') // clear the attribute after applying it to innerHTML
       let newTitleEl = ''
       if (this.titleEl && this.getAttribute('changeTitle') === 'true') {
-        newTitleEl = container.getElementsByTagName('title')[0] || await __(this).$wwGetTitle(null, html)
+        newTitleEl = typeof container.getElementsByTagName === 'function' && container.getElementsByTagName('title')[0] ? container.getElementsByTagName('title')[0] : await __(this).$wwGetTitle(null, html) // chrome doesn't have getElementsByTagName on shodowDom Root
         if (newTitleEl) this.titleEl.$setInnerText(newTitleEl.innerText || newTitleEl)
       }
       if (this.history && !notUpdateHistory) {
