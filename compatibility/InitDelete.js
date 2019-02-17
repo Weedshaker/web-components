@@ -1,10 +1,10 @@
-import { SharedShadow } from '../shared/SharedShadow.js'
+/* global HTMLElement */
 
 // This container deletes its content, useful to check compatibility
-export default class InitDelete extends SharedShadow() {
+export default class InitDelete extends HTMLElement {
   constructor (...args) {
     super(...args)
 
-    this.container.innerHTML = ''
+    this.remove()
   }
 }

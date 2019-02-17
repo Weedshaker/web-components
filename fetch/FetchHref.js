@@ -1,4 +1,5 @@
 /* global location */
+/* global CustomEvent */
 
 import SharedFetch from './SharedFetch.js'
 import { ProxifyHook } from '../proxifyjs/JavaScript/Classes/Helper/ProxifyHook.js'
@@ -69,9 +70,9 @@ export default class FetchHref extends SharedFetch {
     if (!memory.raw) memory.raw = await this.load(href, childNode.getAttribute('parse') || this.getAttribute('parse') || undefined)
     const content = `${memory.raw}|###|${href}`
     const individuelContentEl = document.getElementById(childNode.getAttribute('fetchToId') || this.getAttribute('fetchToId'))
-    if (individuelContentEl){
+    if (individuelContentEl) {
       individuelContentEl.setAttribute('content', content) // trigger life cycle event
-    }else{
+    } else {
       this.dispatchEvent(new CustomEvent('FetchHref_content', {
         bubbles: true,
         detail: {
