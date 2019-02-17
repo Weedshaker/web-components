@@ -3,7 +3,6 @@
 import { SharedShadow } from '../shared/SharedShadow.js'
 
 // This container displays a MenuIcon
-
 // querySelector:string (default undefined) -> the target of this query will receive open and close class synchronasly
 // width:string (default 35px)
 // height:string (default 5px)

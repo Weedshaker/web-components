@@ -17,7 +17,7 @@ const __ = new ProxifyHook(Events(Html(Proxify()))).get()
 // href:string = fetchPath
 // ---applies to both with prio href el---
 // parse:string = "text", "json", ... (default "text")
-// fetchToId:string = id of the content container to push text to as "content" attribute
+// fetchToId:string = id of the content container to push text to as "content" attribute, if not set El will dispatch an event, listen eg. document.getElementsByTagName('body')[0].addEventListener('FetchHref_content', e => console.log(e));
 // autoLoad:boolean = (default "false")
 // lazy:boolean = (default "false")
 export default class FetchHref extends SharedFetch {
@@ -67,8 +67,19 @@ export default class FetchHref extends SharedFetch {
   }
   async applyContent (childNode, href, memory) {
     if (!memory.raw) memory.raw = await this.load(href, childNode.getAttribute('parse') || this.getAttribute('parse') || undefined)
-    const individuelContentEl = document.getElementById(childNode.getAttribute('fetchToId') || this.getAttribute('fetchToId') || 'container')
-    if (individuelContentEl) individuelContentEl.setAttribute('content', `${memory.raw}|###|${href}`) // trigger life cycle event
+    const content = `${memory.raw}|###|${href}`
+    const individuelContentEl = document.getElementById(childNode.getAttribute('fetchToId') || this.getAttribute('fetchToId'))
+    if (individuelContentEl){
+      individuelContentEl.setAttribute('content', content) // trigger life cycle event
+    }else{
+      this.dispatchEvent(new CustomEvent('FetchHref_content', {
+        bubbles: true,
+        detail: {
+          content,
+          childNode
+        }
+      }))
+    }
   }
   compareHashStrings (string1, string2) {
     return string1.replace('#', '').replace(/%20/g, ' ') === string2.replace('#', '').replace(/%20/g, ' ')
