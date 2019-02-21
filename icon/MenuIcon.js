@@ -20,7 +20,7 @@ export default class MenuIcon extends SharedShadow() {
     this.openClass = this.getAttribute('openClass') ? this.getAttribute('openClass') : 'open'
     this.barClass = this.getAttribute('barClass') ? this.getAttribute('barClass') : 'bar'
     this.transition = this.getAttribute('transition') ? this.getAttribute('transition') : '0.4s'
-    this.container.innerHTML = `
+    this.root.innerHTML = `
     <style>
       :host {
         display: inline-block;

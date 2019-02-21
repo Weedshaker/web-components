@@ -58,7 +58,7 @@ export default class FetchContainer extends SharedFetch {
   }
   async attributeChangedCallback (name, oldValue, newValue, notUpdateHistory = false) {
     if (name === 'content' && newValue) {
-      const container = __(this.container)
+      const container = __(this.root)
       const [html, href] = newValue.split(this.htmlHrefSplit)
       // load it into an iframe (shadow dom does not sandbox js)
       if (this.getAttribute('useIframe') !== 'false' && (!html || html.includes('<script')) && href) {

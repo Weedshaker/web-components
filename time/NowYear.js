@@ -5,6 +5,6 @@ export default class NowYear extends SharedShadow() {
   constructor (...args) {
     super(...args)
 
-    this.container.innerHTML = (new Date()).getFullYear()
+    this.root.innerHTML = (new Date()).getFullYear()
   }
 }

@@ -25,8 +25,8 @@ export default class FetchHref extends SharedFetch {
   constructor (...args) {
     super(...args)
 
-    // copy children to shadow, if shadow (this.root) exists
-    if (this.root) this.root = __(this.root).$appendChildren(Array.from(this.childNodes))
+    // copy children to shadow, if shadow (this.shadow) exists
+    if (this.shadow) this.shadow = __(this.shadow).$appendChildren(Array.from(this.childNodes))
 
     this.allLinks = []
 
@@ -38,7 +38,7 @@ export default class FetchHref extends SharedFetch {
   }
   connectedCallback () {
     if (!this.initialized) {
-      const container = __(this.container)
+      const container = __(this.root)
       this.addOnClick(container.childNodes)
       this.initialized = true
     }

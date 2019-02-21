@@ -5,9 +5,9 @@ export const SharedShadow = (ChoosenHTMLElement = HTMLElement) => class SharedSh
     super(...args)
 
     const shadow = this.getAttribute('shadow') || 'open'
-    if (shadow !== 'false') this.root = this.attachShadow({ mode: shadow })
+    if (shadow !== 'false') this.shadow = this.attachShadow({ mode: shadow })
   }
-  get container () {
-    return this.root || this
+  get root () {
+    return this.shadow || this
   }
 }
