@@ -36,13 +36,14 @@ export default class FetchContainer extends SharedFetch {
     this.htmlHrefSplit = '|###|'
 
     this.origChildNodes = Array.from(this.childNodes)
+    // copy children to shadow, if shadow (this.shadow) exists
+    if (this.shadow) this.shadow = __(this.shadow).$appendChildren(Array.from(this.childNodes))
 
     this.titleEl = document.getElementsByTagName('title')[0] && __(document.getElementsByTagName('title')[0])
     this.baseEl = document.getElementsByTagName('base')[0] && __(document.getElementsByTagName('base')[0])
     if (this.baseEl && !this.baseEl.getAttribute('orig_href')) this.baseEl.setAttribute('orig_href', this.baseEl.getAttribute('href'))
 
     this.iframeSize = [this.getAttribute('iframeWidth'), this.getAttribute('iframeHeight')]
-    if (this.getAttribute('href')) this.directLoadHref(this.getAttribute('href'))
     if (this.getAttribute('history') === 'true') {
       this.history = new Map()
       window.addEventListener('popstate', event => {
@@ -52,6 +53,9 @@ export default class FetchContainer extends SharedFetch {
         }
       })
     }
+  }
+  connectedCallback() {
+    if (this.getAttribute('href')) this.directLoadHref(this.getAttribute('href'))
   }
   async directLoadHref (href) {
     this.setAttribute('content', `${await this.load(href, this.getAttribute('parse') || undefined)}${this.htmlHrefSplit}${this.getAttribute('href')}`)
