@@ -20,6 +20,7 @@ const __ = new ProxifyHook(Events(Html(Proxify()))).get()
 // parse:string = "text", "json", ... (default "text")
 // fetchToId:string = id of the content container to push text to as "content" attribute, if not set El will dispatch an event, listen eg. document.getElementsByTagName('body')[0].addEventListener('FetchHref_content', e => console.log(e));
 // autoLoad:boolean = (default "false")
+// fetchOptions: string = "{'mode': 'same-origin'}"
 // lazy:boolean = (default "false")
 export default class FetchHref extends SharedFetch {
   constructor (...args) {

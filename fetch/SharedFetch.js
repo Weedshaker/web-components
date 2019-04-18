@@ -4,6 +4,7 @@
 
 import { SharedShadow } from '../shared/SharedShadow.js'
 
+// fetchOptions: string = "{'mode': 'same-origin'}"
 // lazy:boolean = (default "false")
 export default class SharedFetch extends SharedShadow() {
   constructor (...args) {
@@ -39,7 +40,7 @@ export default class SharedFetch extends SharedShadow() {
   }
   async load (path, parse = 'text') {
     try {
-      const response = await fetch(path)
+      const response = await fetch(path, this.jsonParseAttribute('fetchOptions'))
       return await response[parse]()
     } catch (e) {
       console.warn(`${path} could not be loaded: ${e.message}`)

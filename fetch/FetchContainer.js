@@ -27,6 +27,7 @@ const __ = new ProxifyHook(Events(Html(WebWorkers(Chain(Proxify()))))).get()
 // changeTitle:boolean (default false)
 // history:boolean (default false)
 // href:string = fetchPath
+// fetchOptions: string = "{'mode': 'same-origin'}"
 // lazy:boolean = (default "false")
 export default class FetchContainer extends SharedFetch {
   static get observedAttributes () { return ['content'] }
