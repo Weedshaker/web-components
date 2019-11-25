@@ -1,11 +1,13 @@
 // @ts-check
+/* global self */
 
-import { SharedShadow } from '../shared/SharedShadow.js'
-import { ProxifyHook } from '../proxifyjs/JavaScript/Classes/Helper/ProxifyHook.js'
-import { Proxify } from '../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
-import { Chain } from '../proxifyjs/JavaScript/Classes/Traps/Misc/Chain.js'
-import { WebWorkers } from '../proxifyjs/JavaScript/Classes/Traps/Misc/WebWorkers.js'
-import { Html } from '../proxifyjs/JavaScript/Classes/Traps/Dom/Html.js'
+import { SharedShadow } from '../../shared/SharedShadow.js'
+import { ProxifyHook } from '../../proxifyjs/JavaScript/Classes/Helper/ProxifyHook.js'
+import { Proxify } from '../../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
+import { Chain } from '../../proxifyjs/JavaScript/Classes/Traps/Misc/Chain.js'
+import { WebWorkers } from '../../proxifyjs/JavaScript/Classes/Traps/Misc/WebWorkers.js'
+import { Html } from '../../proxifyjs/JavaScript/Classes/Traps/Dom/Html.js'
+import '../../node_modules/interactjs/dist/interact.js'
 // @ts-ignore
 const __ = new ProxifyHook(Html(WebWorkers(Chain(Proxify())))).get()
 
@@ -22,19 +24,18 @@ export default class CssGrid extends SharedShadow() {
   constructor (...args) {
     super(...args)
 
-    // options
-    const minSize = this.getAttribute('minSize') || 100
-
+    if (window.interact) {
+      this.interact = self.interact
+    } else {
+      console.error('SST: Can\'t find interact at global scope!!!')
+    }
+    
     // css
+    const minSize = this.getAttribute('minSize') || 100
     const style = document.createElement('style')
-    style.textContent = this.getAttribute('style') || `
-      :host {
-        display: grid;
-        grid-auto-columns: minmax(${minSize}px, 1fr);
-        grid-auto-flow: dense;
-        grid-auto-rows: minmax(${minSize}px, 1fr);
-        grid-gap: unset;
-      }
+    style.textContent = (this.getAttribute('style') ||
+    // optional styles
+    `
       :host > * {
         background-color: rgba(166, 211, 225, .6);
         box-shadow: -1px -1px rgba(9, 9, 246, .3) inset;
@@ -42,6 +43,16 @@ export default class CssGrid extends SharedShadow() {
       }
       :host > *.dragged{
         background-color: rgba(218, 248, 218, .6);
+      }
+    `) + 
+    // must have styles
+    `
+      :host {
+        display: grid;
+        grid-auto-columns: minmax(${minSize}px, 1fr);
+        grid-auto-flow: dense;
+        grid-auto-rows: minmax(${minSize}px, 1fr);
+        grid-gap: unset;
       }
     `
 
