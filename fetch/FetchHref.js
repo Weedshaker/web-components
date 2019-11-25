@@ -37,6 +37,7 @@ export default class FetchHref extends SharedFetch {
       })
     }
   }
+
   connectedCallback () {
     if (!this.initialized) {
       const container = __(this.root)
@@ -44,6 +45,7 @@ export default class FetchHref extends SharedFetch {
       this.initialized = true
     }
   }
+
   addOnClick (childNodes) {
     Array.from(childNodes).forEach(childNode => {
       let href = ''
@@ -67,6 +69,7 @@ export default class FetchHref extends SharedFetch {
       this.addOnClick(childNode.childNodes) // recursive
     })
   }
+
   async applyContent (childNode, href, memory) {
     if (!memory.raw) memory.raw = await this.load(href, childNode.getAttribute('parse') || this.getAttribute('parse') || undefined)
     const content = `${memory.raw}|###|${href}`
@@ -83,6 +86,7 @@ export default class FetchHref extends SharedFetch {
       }))
     }
   }
+
   compareHashStrings (string1, string2) {
     return string1.replace('#', '').replace(/%20/g, ' ') === string2.replace('#', '').replace(/%20/g, ' ')
   }

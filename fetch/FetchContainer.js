@@ -55,12 +55,15 @@ export default class FetchContainer extends SharedFetch {
       })
     }
   }
-  connectedCallback() {
+
+  connectedCallback () {
     if (this.getAttribute('href')) this.directLoadHref(this.getAttribute('href'))
   }
+
   async directLoadHref (href) {
     this.setAttribute('content', `${await this.load(href, this.getAttribute('parse') || undefined)}${this.htmlHrefSplit}${this.getAttribute('href')}`)
   }
+
   async attributeChangedCallback (name, oldValue, newValue, notUpdateHistory = false) {
     if (name === 'content' && newValue) {
       const container = __(this.root)
@@ -128,6 +131,7 @@ export default class FetchContainer extends SharedFetch {
       }
     }
   }
+
   getBase (text) {
     try {
       return /.*<base.*?href="(.*?)".*?>/mgi.exec(text)[1]
@@ -135,6 +139,7 @@ export default class FetchContainer extends SharedFetch {
       return ''
     }
   }
+
   getTitle (text) {
     try {
       return /.*<title>(.*?)<\/title>/mgi.exec(text)[1]
@@ -142,6 +147,7 @@ export default class FetchContainer extends SharedFetch {
       return ''
     }
   }
+
   activateJS (container) {
     Array.from(container.getElementsByTagName('script')).forEach(script => {
       const newScript = document.createElement('script')

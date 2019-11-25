@@ -25,6 +25,7 @@ export default class SharedFetch extends SharedShadow() {
       }).observe(this)
     }
   }
+
   handleIntersect (entries, observer) {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -38,6 +39,7 @@ export default class SharedFetch extends SharedShadow() {
     this.load = this._load // restore normal behavior after intersected
     observer.disconnect()
   }
+
   async load (path, parse = 'text') {
     try {
       const response = await fetch(path, this.jsonParseAttribute('fetchOptions'))
