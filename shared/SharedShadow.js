@@ -16,7 +16,7 @@ export const SharedShadow = (ChoosenHTMLElement = HTMLElement) => class SharedSh
     const attribute = this.getAttribute(name)
     if (!attribute || typeof attribute !== 'string') return undefined
     try {
-      return JSON.parse(attribute.replace(/\'/g, '"')) || undefined
+      return JSON.parse(attribute.replace(/'/g, '"')) || undefined
     } catch (e) {
       return undefined
     }
