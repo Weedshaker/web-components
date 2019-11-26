@@ -21,15 +21,28 @@ const __ = new ProxifyHook(Html(WebWorkers(Chain(Proxify())))).get()
  * @attribute {number} [minSize = 100]
  */
 export default class CssGrid extends SharedShadow() {
+  // attributeChangedCallback - Note: only attributes listed in the observedAttributes property will receive this callback.
+  static get observedAttributes () { return ['active'] }
   constructor (...args) {
+    console.log('constructor')
     super(...args)
 
+    // interact.js
     if (window.interact) {
       this.interact = self.interact
     } else {
       console.error('SST: Can\'t find interact at global scope!!!')
     }
-    
+
+    // callbacks
+    this.observer = new MutationObserver(this.mutationCallback)
+    // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserverInit
+    this.observerConfig = {
+      attributes: false, // already observed at attributeChangedCallback
+      childList: true,
+      subtree: false
+    }
+
     // css
     const minSize = this.getAttribute('minSize') || 100
     const style = document.createElement('style')
@@ -44,7 +57,7 @@ export default class CssGrid extends SharedShadow() {
       :host > *.dragged{
         background-color: rgba(218, 248, 218, .6);
       }
-    `) + 
+    `) +
     // must have styles
     `
       :host {
@@ -56,19 +69,32 @@ export default class CssGrid extends SharedShadow() {
       }
     `
 
-    // copy children to shadow, if shadow (this.shadow) exists
-    if (this.shadow) this.shadow = __(this.shadow).$appendChildren([style, ...Array.from(this.childNodes)])
+    // paste style to root
+    if (this.shadow) {
+      // + move children to shadow, if shadow (this.shadow) exists
+      __(this.root).$appendChildren([style, ...Array.from(this.childNodes)])
+    } else {
+      // + replace css :host with nodeName, if shadow (this.shadow) NOT exists
+      style.textContent = style.textContent.replace(/:host/g, this.nodeName)
+      __(this.root).$appendChildren([style])
+    }
   }
 
   connectedCallback () {
-    console.log('connected');
+    console.log('connected', this)
+    this.observer.observe(this.root, this.observerConfig)
   }
 
   disconnectedCallback () {
-    console.log('disconnected');
+    console.log('disconnected')
+    this.observer.disconnect()
   }
 
-  attributeChangedCallback () {
-    console.log('attributeChanged');
+  attributeChangedCallback (name, oldValue, newValue) {
+    console.log('attributeChanged', name, oldValue, newValue)
+  }
+
+  mutationCallback (mutationsList, observer) {
+    console.log('mutation', mutationsList, observer)
   }
 }
