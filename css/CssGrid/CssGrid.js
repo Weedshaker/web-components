@@ -7,7 +7,7 @@ import { Proxify } from '../../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
 import { Chain } from '../../proxifyjs/JavaScript/Classes/Traps/Misc/Chain.js'
 import { WebWorkers } from '../../proxifyjs/JavaScript/Classes/Traps/Misc/WebWorkers.js'
 import { Html } from '../../proxifyjs/JavaScript/Classes/Traps/Dom/Html.js'
-import '../../node_modules/interactjs/dist/interact.js'
+
 // @ts-ignore
 const __ = new ProxifyHook(Html(WebWorkers(Chain(Proxify())))).get()
 
@@ -23,15 +23,25 @@ const __ = new ProxifyHook(Html(WebWorkers(Chain(Proxify())))).get()
 export default class CssGrid extends SharedShadow() {
   // attributeChangedCallback - Note: only attributes listed in the observedAttributes property will receive this callback.
   static get observedAttributes () { return ['active'] }
+
   constructor (...args) {
     console.log('constructor')
     super(...args)
 
     // interact.js
-    if (window.interact) {
+    const interactErrorMsg = 'SST: Can\'t find interact at global scope!!!'
+    if (!self.interact) {
+      this.interact = import('../../node_modules/interactjs/dist/interact.js').then(module => {
+        if (module && self.interact) {
+          this.interact = self.interact
+        } else {
+          console.error(interactErrorMsg)
+        }
+      })
+    } else if (typeof this.interact === 'function') {
       this.interact = self.interact
     } else {
-      console.error('SST: Can\'t find interact at global scope!!!')
+      console.error(interactErrorMsg)
     }
 
     // callbacks
@@ -81,10 +91,18 @@ export default class CssGrid extends SharedShadow() {
   }
 
   connectedCallback () {
-    console.log('connected', this)
+    console.log('connected')
     this.observer.observe(this.root, this.observerConfig)
+    // check if this.interact is a promise
+    if ('then' in this.interact) {
+      this.interact.then(() => console.log('promise start interact'))
+    } else if (typeof this.interact === 'function') {
+      console.log('direct start interact')
+    } else {
+      console.error('SST: Can\'t start interactJS!!!')
+    }
   }
-
+  
   disconnectedCallback () {
     console.log('disconnected')
     this.observer.disconnect()
