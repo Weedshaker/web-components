@@ -10,7 +10,7 @@
             "request": "launch",
             "reAttach": true,
             "reloadOnChange": {
-                "watch": "${workspaceFolder}/**/*.js",
+                "watch": ["${workspaceFolder}/**/*.js", "${workspaceFolder}/**/*.html"],
                 "ignore": "**/node_modules/**"
             },
             "internalConsoleOptions": "openOnSessionStart",
