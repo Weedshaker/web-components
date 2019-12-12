@@ -23,7 +23,5 @@
   "devDependencies": {
     "standard": "*"
   },
-  "dependencies": {
-    "interactjs": "^1.7.2"
-  }
+  "dependencies": {}
 }
