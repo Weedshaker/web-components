@@ -18,8 +18,20 @@ const __ = new ProxifyHook(Html(Chain(Proxify()))).get()
  * @export
  * @class CssGrid
  * @attribute {'false' | 'open' | 'closed'} [shadow = 'open']
- * @attribute {string} [style = '...']
- * @attribute {number} [minSize = 100]
+ * @attribute {string} [customStyle = `
+    ${host} {
+      --overlay-grid-border: 1px dashed rgba(148, 0, 255, .6);
+    }
+    ${host} > section.grid > * {
+      background-color: rgba(166, 211, 225, .6);
+      box-shadow: -1px -1px rgba(9, 9, 246, .3) inset;
+    }
+    ${host} > section.grid > *.dragged{
+      background-color: rgba(218, 248, 218, .6);
+    }
+   `]
+ * @attribute {number} [minSizeColumn = 100]
+ * @attribute {number} [minSizeRow = 100]
  */
 export default class CssGrid extends SharedShadow() {
   // attributeChangedCallback - Note: only attributes listed in the observedAttributes property will receive this callback.
@@ -58,9 +70,11 @@ export default class CssGrid extends SharedShadow() {
     }
 
     // css
+    this.defaultZIndex = 100
     const host = this.shadow ? ':host' : this.nodeName // host: only works if shadow active
-    this.minSize = this.getAttribute('minSize') || 100
-    const style = __('style').$setTextContent((this.getAttribute('style') ||
+    this.minSizeColumn = Number(this.getAttribute('minSizeColumn')) || 100
+    this.minSizeRow = Number(this.getAttribute('minSizeRow')) || 100
+    const customStyle = __('style').$setTextContent((this.getAttribute('customStyle') || '').replace(/\${host}/g, host) ||
       // optional styles
       `
         ${host} {
@@ -69,35 +83,37 @@ export default class CssGrid extends SharedShadow() {
         ${host} > section.grid > * {
           background-color: rgba(166, 211, 225, .6);
           box-shadow: -1px -1px rgba(9, 9, 246, .3) inset;
-          z-index: 100;
         }
         ${host} > section.grid > *.dragged{
           background-color: rgba(218, 248, 218, .6);
         }
-      `) +
+      `
+    ).$setClassName('customStyle')
+    const mandatoryStyle = __('style').$setTextContent(
       // must have styles
       `
         ${host} > section.grid {
           display: grid;
-          grid-auto-columns: minmax(${this.minSize}px, 1fr);
+          grid-auto-columns: minmax(${this.minSizeColumn}px, 1fr);
           grid-auto-flow: dense;
-          grid-auto-rows: minmax(${this.minSize}px, 1fr);
+          grid-auto-rows: minmax(${this.minSizeRow}px, 1fr);
           grid-gap: unset;
         }
         ${host} > section.grid > * {
           box-sizing: border-box;
           touch-action: none;
           user-select: none;
+          z-index: ${this.defaultZIndex};
         }
       `
-    )
+    ).$setClassName('mandatoryStyle')
 
     // grid
     this.grid = __('section').$setClassName('grid')
 
     // move children to grid
     __(this.grid).$appendChildren(Array.from(this.childNodes))
-    __(this.root).$appendChildren([style, this.grid])
+    __(this.root).$appendChildren([customStyle, mandatoryStyle, this.grid])
   }
 
   connectedCallback () {
@@ -177,7 +193,7 @@ export default class CssGrid extends SharedShadow() {
         edges: { left: false, right: true, bottom: true, top: false },
         inertia: true, // Inertia allows drag and resize actions to continue after the user releases the pointer at a fast enough speed. http://interactjs.io/docs/inertia/
         restrictSize: {
-          min: { width: this.minSize, height: this.minSize }
+          min: { width: this.minSizeColumn, height: this.minSizeRow }
         }
       })
       .on('resizestart', event => {
@@ -217,7 +233,7 @@ export default class CssGrid extends SharedShadow() {
         __(event.target)
           .$getStyle((cell, prop, style) => {
             const zIndex = Number(style.$getZIndex())
-            style.$setZIndex(!zIndex || zIndex === 1 ? /* defaultZIndex */ 100 - 1 : zIndex - 1)
+            style.$setZIndex(!zIndex || zIndex === 1 ? this.defaultZIndex - 1 : zIndex - 1)
           })
       })
   }
