@@ -8,6 +8,7 @@ import { ProxifyHook } from '../../proxifyjs/JavaScript/Classes/Helper/ProxifyHo
 import { Proxify } from '../../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
 import { Chain } from '../../proxifyjs/JavaScript/Classes/Traps/Misc/Chain.js'
 import { Html } from '../../proxifyjs/JavaScript/Classes/Traps/Dom/Html.js'
+import Drag from './Drag.js'
 
 // @ts-ignore
 const __ = new ProxifyHook(Html(Chain(Proxify()))).get()
@@ -37,7 +38,6 @@ export default class CssGrid extends SharedShadow() {
   // attributeChangedCallback - Note: only attributes listed in the observedAttributes property will receive this callback.
   static get observedAttributes () { return ['active'] }
 
-  // TODO: optional styles being spliced out when interactjs is deactivated
   constructor (...args) {
     console.log('constructor')
     super(...args)
@@ -48,6 +48,8 @@ export default class CssGrid extends SharedShadow() {
       if (!error && typeof self.interact === 'function' && self.interact.version) {
         // @ts-ignore
         this.interact = self.interact
+        // init all needed functionality
+        this.drag = new Drag(__, this.interact, this.root)
       } else {
         console.error('SST: Can\'t find interact at global scope!!!', error)
       }
@@ -110,6 +112,8 @@ export default class CssGrid extends SharedShadow() {
 
     // grid
     this.grid = __('section').$setClassName('grid')
+    // body
+    this.body = __(document.body)
 
     // move children to grid
     __(this.grid).$appendChildren(Array.from(this.childNodes))
@@ -121,9 +125,9 @@ export default class CssGrid extends SharedShadow() {
     this.observer.observe(this.root, this.observerConfig)
     // check if this.interact is a promise
     if ('then' in this.interact) {
-      this.interact.then(() => this.interactStart())
+      this.interact.then(() => this.drag.start(this.grid, this.body, this.selector))
     } else {
-      this.interactStart()
+      this.drag.start(this.grid, this.body, this.selector)
     }
   }
 
@@ -140,54 +144,16 @@ export default class CssGrid extends SharedShadow() {
     console.log('mutation', mutationsList, observer)
   }
 
+  get selector () {
+    return Array.from(this.grid.children).reduce((acc, child) => child.tagName && !acc.includes(child.tagName) ? acc.concat([child.tagName]) : acc, []).join(',') || '*';
+  }
+
   // interact.js
-  interactStart (grid = __(this.grid)) {
-    const body = __(document.body)
+  dragStart (interact = this.interact, grid = __(this.grid), body = __(document.body)) {
     let transform // keep last transform value on style
-    let dragPoint = [0, 0] // [row, column] started at first click within the target cell, to figure at which cell within the target got clicked, since this can span multiple cells
     let initRect // resizing initial rect
     const selector = Array.from(grid.children).reduce((acc, child) => child.tagName && !acc.includes(child.tagName) ? acc.concat([child.tagName]) : acc, []).join(',') || '*'
-    this.interact(selector, { context: grid.__raw__ })
-      .draggable({
-        autoScroll: true,
-        inertia: true, // Inertia allows drag and resize actions to continue after the user releases the pointer at a fast enough speed. http://interactjs.io/docs/inertia/
-        onstart: event => {
-          __(event.target)
-            .$getStyle((cell, prop, style) => {
-              style
-              // save original transform
-                .$getTransform((style, prop, trans) => (transform = trans || 'none'))
-                .$setTransform('none')
-                // calculate the dragPoint within the cell, this is important for cells which span more than one grid fraction
-              dragPoint = this.calcPoint(cell, cell, [event.pageX, event.pageY], 'floor')
-              this.drawOverlayGrid(body, grid, cell)
-            })
-        },
-        onmove: event => {
-          // move cell with mouse by translate x, y
-          __(event.target)
-            .$getStyle((cell, prop, style) => {
-              const [str, x, y] = style.transform.match(/.*?\(([-0-9]*)[^0-9-]*([-0-9]*)/) || ['', 0, 0] // eslint-disable-line no-unused-vars
-              style.$setTransform(`translate(${Math.round(Number(x) + event.dx)}px, ${Math.round(Number(y) + event.dy)}px)`)
-            })
-        },
-        onend: event => {
-          __(event.target)
-            .$getStyle((cell, prop, style) => {
-              // reset translate, otherwise cell coordinates will be off
-              style.$setTransform('none')
-              // calculate the dropPoint within the grid
-              const dropPoint = this.calcPoint(grid, cell, [event.pageX, event.pageY], 'ceil')
-              // set grid inline style
-              style
-                .$setGridRowStart(dropPoint[1] - dragPoint[1] > 0 ? dropPoint[1] - dragPoint[1] : 1)
-                .$setGridColumnStart(dropPoint[0] - dragPoint[0] > 0 ? dropPoint[0] - dragPoint[0] : 1)
-                .$setTransform(transform)
-              cell.classList.add('dragged')
-              this.removeOverlayGrid(body)
-            })
-        }
-      })
+    interact(selector, { context: grid.__raw__ })
       .resizable({
         autoScroll: true,
         edges: { left: false, right: true, bottom: true, top: false },
@@ -235,97 +201,6 @@ export default class CssGrid extends SharedShadow() {
             const zIndex = Number(style.$getZIndex())
             style.$setZIndex(!zIndex || zIndex === 1 ? this.defaultZIndex - 1 : zIndex - 1)
           })
-      })
-  }
-
-  // calculates the point of [column, row] within the grid
-  calcPoint (grid, cell, cors, mathFunc = 'ceil') {
-    const gridRect = this.getBoundingClientRectAbsolute(grid)
-    const cellRect = this.getCellRect(cell)
-    const [x, y] = [cors[0] - gridRect.left, cors[1] - gridRect.top]
-    return [Math[mathFunc](x / cellRect.width), Math[mathFunc](y / cellRect.height)]
-  }
-
-  // calculates the bounding rectangle of one cell within the grid (takes in account when an item spans multiple cells)
-  getCellRect (cell, rect = undefined) {
-    const regex = /span\s*/
-    const cellRect = rect || this.getBoundingClientRectAbsolute(cell)
-    cell.style
-      .$getGridRowEnd((cell, prop, end = '1') => {
-        const rows = Number(end.replace(regex, '')) || 1
-        cellRect.bottom = (cellRect.bottom - cellRect.top) / rows + cellRect.top
-        cellRect.height = cellRect.height / rows
-      })
-      .$getGridColumnEnd((cell, prop, end = '1') => {
-        const columns = Number(end.replace(regex, '')) || 1
-        cellRect.right = (cellRect.right - cellRect.left) / columns + cellRect.left
-        cellRect.width = cellRect.width / columns
-      })
-    return cellRect
-  }
-
-  // getBoundingClientRect with adjusted coordinates according to window scroll cors
-  getBoundingClientRectAbsolute (node) {
-    const rect = node.getBoundingClientRect().toJSON()
-    return Object.assign(rect, { top: rect.top + window.scrollY, right: rect.right + window.scrollX, bottom: rect.bottom + window.scrollY, left: rect.left + window.scrollX })
-  }
-
-  // draw grid lines
-  drawOverlayGrid (body, grid, cell) {
-    // set overflow scroll, so that calculations are with the correct vw and not unpredictably modified by scrollbars
-    body
-      .$getStyle((cell, prop, style) => {
-        style
-          // save original overflow
-          .$getOverflow((style, prop, overflow) => (this.bodyOverflow = overflow || 'auto'))
-          .$setOverflow('scroll')
-      })
-    const gridRect = this.getBoundingClientRectAbsolute(grid)
-    const cellRect = this.getCellRect(cell)
-    const rows = Math.round(gridRect.height / cellRect.height)
-    const columns = Math.round(gridRect.width / cellRect.width)
-    const additional = 3
-    return (this.overlayGrid = __(this.root)
-      .appendChild(__('section'))
-      .$setClassName('overlayGrid')
-      .$setStyle(`
-        background: none;
-        box-shadow: none;
-        height: ${gridRect.height}px;
-        left: ${gridRect.left}px;
-        position: absolute;
-        top: ${gridRect.top}px;
-        width: ${gridRect.width}px;
-      `)
-      .$func(overlayGrid => {
-        for (let i = 0; i < rows + additional; i++) {
-          const lastRow = i === rows + additional - 1
-          for (let j = 0; j < columns + additional; j++) {
-            const lastColumn = j === columns + additional - 1
-            overlayGrid
-              .appendChild(__('div'))
-              .$setStyle(`
-                ${!lastRow ? 'border-bottom: var(--overlay-grid-border);' : ''}
-                ${!lastColumn ? 'border-right: var(--overlay-grid-border);' : ''}
-                height: ${cellRect.height}px;
-                left: ${cellRect.width * j}px;
-                position: absolute;
-                top: ${cellRect.height * i}px;
-                width: ${cellRect.width}px;
-              `)
-          }
-        }
-      })
-    )
-  }
-
-  removeOverlayGrid (body) {
-    if (this.overlayGrid) this.overlayGrid.remove()
-    // reset overflow to its original value
-    body
-      .$getStyle((cell, prop, style) => {
-        style
-          .$setOverflow(this.bodyOverflow)
       })
   }
 }

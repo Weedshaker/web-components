@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch localhost...cssGrid.html",
+            "name": "Launch localhost...example.html",
             "type": "firefox",
             "request": "launch",
             "reAttach": true,
@@ -15,7 +15,7 @@
             },
             "internalConsoleOptions": "openOnSessionStart",
             "firefoxArgs": ["-devtools"],
-            "url": "http://localhost/tests/web-components/css/CssGrid/expl/cssGrid.html",
+            "url": "http://localhost/tests/web-components/css/CssGrid/example.html",
             "webRoot": "${workspaceFolder}"
         }
     ]
