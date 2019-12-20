@@ -1,4 +1,8 @@
 // @ts-nocheck
+/**
+ * @typedef { import("./Helper/typesCalcsDraws").ProxifyHook } ProxifyHook
+ * @typedef { import("./Helper/typesCalcsDraws").Interact } Interact
+ */
 
 /* global self */
 /* global MutationObserver */
@@ -12,7 +16,7 @@ import Drag from './Helper/Drag.js'
 import Resize from './Helper/Resize.js'
 import Doubletap from './Helper/Doubletap.js'
 
-// @ts-ignore
+/** @type { ProxifyHook } */
 const __ = new ProxifyHook(Html(Chain(Proxify()))).get()
 
 /**
@@ -46,9 +50,8 @@ export default class CssGrid extends SharedShadow() {
 
     // load interact.js
     const interactLoaded = error => {
-      // @ts-ignore
       if (!error && typeof self.interact === 'function' && self.interact.version) {
-        // @ts-ignore
+        /** @type { Interact } */
         this.interact = self.interact
         // init all needed functionality
         this.drag = new Drag(__, this.interact, this.root)
@@ -58,7 +61,6 @@ export default class CssGrid extends SharedShadow() {
         console.error('SST: Can\'t find interact at global scope!!!', error)
       }
     }
-    // @ts-ignore
     if (!self.interact) {
       // interact.js has no transpiled release/dist version in the repo but typescript. This makes it unsuitable to use it as a submodule, hence using jsdelivr
       this.interact = import('https://cdn.jsdelivr.net/npm/interactjs@1.7.2/dist/interact.min.js').then(module => interactLoaded()).catch(error => interactLoaded(error))

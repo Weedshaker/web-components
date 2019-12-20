@@ -1,8 +1,8 @@
 // @ts-check
 /**
- * @typedef { { __raw__: HTMLElement, style: *, $getStyle: * } & HTMLElement } ProxifyElement
- * @typedef { (HTMLElement)=>* } ProxifyHook
- * @typedef { ([], {context})=>* } Interact
+ * @typedef { { __raw__: HTMLElement, style: *, $getStyle: *, $setClassName: * } & HTMLElement } ProxifyElement
+ * @typedef { (HTMLElement)=>ProxifyElement } ProxifyHook
+ * @typedef { ([], {context})=>* & { version: string} } Interact
  * @typedef { [number, number] } XY
  */
 
