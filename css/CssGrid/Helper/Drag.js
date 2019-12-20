@@ -1,10 +1,21 @@
 // @ts-check
-/** @typedef {{ __raw__: HTMLElement }} ProxifyElement */
+/**
+ * @typedef { import("./typesCalcsDraws").ProxifyElement } ProxifyElement
+ * @typedef { import("./typesCalcsDraws").ProxifyHook } ProxifyHook
+ * @typedef { import("./typesCalcsDraws").Interact } Interact
+ * @typedef { import("./typesCalcsDraws").XY } XY
+ */
 
-import { calcPoint, drawOverlayGrid, removeOverlayGrid } from './calcsAndOverlayGrid.js'
+import { calcPoint, drawOverlayGrid, removeOverlayGrid } from './typesCalcsDraws.js'
 
 export default class Drag {
-
+  /**
+   *Creates an instance of Drag.
+   * @param { ProxifyHook } proxifyHook
+   * @param { Interact } interact
+   * @param { HTMLElement } root
+   * @memberof Drag
+   */
   constructor (proxifyHook, interact, root) {
     this.proxifyHook = proxifyHook
     this.interact = interact
@@ -16,16 +27,20 @@ export default class Drag {
    *
    * @param { ProxifyElement } grid
    * @param { ProxifyElement } body
-   * @param { HTMLElement } selector
-   * @returns { void }
+   * @param { HTMLElement[] } selector
+   * @returns { * }
    */
   start (grid, body, selector) {
     const __ = this.proxifyHook
+    /** @type { string } */
     let transform // keep last transform value on style
+    /** @type { ProxifyElement } */
     let overlayGrid // keep last overlayGrid ProxifyElement ref
+    /** @type { string } */
     let bodyOverflow // keep last overflow of body
+    /** @type { XY } */
     let dragPoint = [0, 0] // [row, column] started at first click within the target cell, to figure at which fraction within the target cell got clicked, since a cell can span multiple fractions
-    this.interact(selector, { context: grid.__raw__ })
+    return this.interact(selector, { context: grid.__raw__ || grid })
       .draggable({
         autoScroll: true,
         inertia: true, // Inertia allows drag and resize actions to continue after the user releases the pointer at a fast enough speed. http://interactjs.io/docs/inertia/

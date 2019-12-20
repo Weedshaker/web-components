@@ -1,16 +1,21 @@
 // @ts-check
-/** @typedef {{ __raw__: HTMLElement, style: * }} ProxifyElement */
+/**
+ * @typedef { { __raw__: HTMLElement, style: *, $getStyle: * } & HTMLElement } ProxifyElement
+ * @typedef { (HTMLElement)=>* } ProxifyHook
+ * @typedef { ([], {context})=>* } Interact
+ * @typedef { [number, number] } XY
+ */
 
 /* global self */
 
 /**
  * calculates the point of [column, row] within the grid
  *
- * @param { HTMLElement | ProxifyElement } grid
- * @param { HTMLElement } cell
- * @param { [number, number] } cors
- * @param {string} [mathFunc='ceil']
- * @returns { [number, number] }
+ * @param { HTMLElement } grid
+ * @param { ProxifyElement } cell
+ * @param { XY } cors
+ * @param { string } [mathFunc='ceil']
+ * @returns { XY }
  */
 export const calcPoint = (grid, cell, cors, mathFunc = 'ceil') => {
   const gridRect = getBoundingClientRectAbsolute(grid)
@@ -23,11 +28,12 @@ export const calcPoint = (grid, cell, cors, mathFunc = 'ceil') => {
  * calculates the bounding rectangle of one cell within the grid (takes in account when an item spans multiple cells)
  *
  * @param { ProxifyElement } cell
- * @param {*} [rect=undefined]
- * @returns
+ * @param { ClientRect } [rect=undefined]
+ * @returns { ClientRect }
  */
 export const getCellRect = (cell, rect = undefined) => {
   const regex = /span\s*/
+  /** @type { * } */
   const cellRect = rect || getBoundingClientRectAbsolute(cell)
   cell.style
     .$getGridRowEnd((cell, prop, end = '1') => {
@@ -43,14 +49,31 @@ export const getCellRect = (cell, rect = undefined) => {
   return cellRect
 }
 
-// getBoundingClientRect with adjusted coordinates according to window scroll cors
+/**
+ * calculates the bounding rectangle (takes scrollX + scrollY in account)
+ *
+ * @param { HTMLElement } node
+ * @returns { ClientRect }
+ */
 export const getBoundingClientRectAbsolute = (node) => {
+  // @ts-ignore
   const rect = node.getBoundingClientRect().toJSON()
   return Object.assign(rect, { top: rect.top + self.scrollY, right: rect.right + self.scrollX, bottom: rect.bottom + self.scrollY, left: rect.left + self.scrollX })
 }
 
-// draw grid lines
-export const drawOverlayGrid = (__, body, grid, container, cell, bodyOverflow) => {
+/**
+ * draw grid lines
+ *
+ * @param { ProxifyHook } __
+ * @param { ProxifyElement } body
+ * @param { HTMLElement } grid
+ * @param { HTMLElement } container
+ * @param { ProxifyElement } cell
+ * @returns { [ProxifyElement, string] }
+ */
+export const drawOverlayGrid = (__, body, grid, container, cell) => {
+  /** @type { string } */
+  let bodyOverflow // keep last overflow of body
   // set overflow scroll, so that calculations are with the correct vw and not unpredictably modified by scrollbars
   body
     .$getStyle((cell, prop, style) => {
@@ -95,10 +118,18 @@ export const drawOverlayGrid = (__, body, grid, container, cell, bodyOverflow) =
         }
       }
     }),
-    bodyOverflow
+  bodyOverflow
   ]
 }
 
+/**
+ * erase grid lines
+ *
+ * @param { ProxifyElement } body
+ * @param { HTMLElement } overlayGrid
+ * @param { string } bodyOverflow
+ * @returns { void }
+ */
 export const removeOverlayGrid = (body, overlayGrid, bodyOverflow) => {
   if (overlayGrid) overlayGrid.remove()
   // reset overflow to its original value

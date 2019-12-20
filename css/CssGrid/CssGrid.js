@@ -1,4 +1,4 @@
-// @ts-check
+// @ts-nocheck
 
 /* global self */
 /* global MutationObserver */
@@ -8,7 +8,9 @@ import { ProxifyHook } from '../../proxifyjs/JavaScript/Classes/Helper/ProxifyHo
 import { Proxify } from '../../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
 import { Chain } from '../../proxifyjs/JavaScript/Classes/Traps/Misc/Chain.js'
 import { Html } from '../../proxifyjs/JavaScript/Classes/Traps/Dom/Html.js'
-import Drag from './Drag.js'
+import Drag from './Helper/Drag.js'
+import Resize from './Helper/Resize.js'
+import Doubletap from './Helper/Doubletap.js'
 
 // @ts-ignore
 const __ = new ProxifyHook(Html(Chain(Proxify()))).get()
@@ -18,8 +20,8 @@ const __ = new ProxifyHook(Html(Chain(Proxify()))).get()
  *
  * @export
  * @class CssGrid
- * @attribute {'false' | 'open' | 'closed'} [shadow = 'open']
- * @attribute {string} [customStyle = `
+ * @attribute { 'false' | 'open' | 'closed' } [shadow = 'open']
+ * @attribute { string } [customStyle = `
     ${host} {
       --overlay-grid-border: 1px dashed rgba(148, 0, 255, .6);
     }
@@ -31,8 +33,8 @@ const __ = new ProxifyHook(Html(Chain(Proxify()))).get()
       background-color: rgba(218, 248, 218, .6);
     }
    `]
- * @attribute {number} [minSizeColumn = 100]
- * @attribute {number} [minSizeRow = 100]
+ * @attribute { number } [minSizeColumn = 100]
+ * @attribute { number } [minSizeRow = 100]
  */
 export default class CssGrid extends SharedShadow() {
   // attributeChangedCallback - Note: only attributes listed in the observedAttributes property will receive this callback.
@@ -50,6 +52,8 @@ export default class CssGrid extends SharedShadow() {
         this.interact = self.interact
         // init all needed functionality
         this.drag = new Drag(__, this.interact, this.root)
+        this.resize = new Resize(__, this.interact, this.root, this.minSizeColumn, this.minSizeRow)
+        this.doubletap = new Doubletap(__, this.interact, this.root, this.defaultZIndex)
       } else {
         console.error('SST: Can\'t find interact at global scope!!!', error)
       }
@@ -125,9 +129,15 @@ export default class CssGrid extends SharedShadow() {
     this.observer.observe(this.root, this.observerConfig)
     // check if this.interact is a promise
     if ('then' in this.interact) {
-      this.interact.then(() => this.drag.start(this.grid, this.body, this.selector))
+      this.interact.then(() => {
+        this.drag.start(this.grid, this.body, this.gridChildTypes)
+        this.resize.start(this.grid, this.body, this.gridChildTypes)
+        this.doubletap.start(this.grid, this.gridChildTypes)
+      })
     } else {
-      this.drag.start(this.grid, this.body, this.selector)
+      this.drag.start(this.grid, this.body, this.gridChildTypes)
+      this.resize.start(this.grid, this.body, this.gridChildTypes)
+      this.doubletap.start(this.grid, this.gridChildTypes)
     }
   }
 
@@ -144,63 +154,13 @@ export default class CssGrid extends SharedShadow() {
     console.log('mutation', mutationsList, observer)
   }
 
-  get selector () {
-    return Array.from(this.grid.children).reduce((acc, child) => child.tagName && !acc.includes(child.tagName) ? acc.concat([child.tagName]) : acc, []).join(',') || '*';
-  }
-
-  // interact.js
-  dragStart (interact = this.interact, grid = __(this.grid), body = __(document.body)) {
-    let transform // keep last transform value on style
-    let initRect // resizing initial rect
-    const selector = Array.from(grid.children).reduce((acc, child) => child.tagName && !acc.includes(child.tagName) ? acc.concat([child.tagName]) : acc, []).join(',') || '*'
-    interact(selector, { context: grid.__raw__ })
-      .resizable({
-        autoScroll: true,
-        edges: { left: false, right: true, bottom: true, top: false },
-        inertia: true, // Inertia allows drag and resize actions to continue after the user releases the pointer at a fast enough speed. http://interactjs.io/docs/inertia/
-        restrictSize: {
-          min: { width: this.minSizeColumn, height: this.minSizeRow }
-        }
-      })
-      .on('resizestart', event => {
-        __(event.target)
-          .$getStyle((cell, prop, style) => {
-            style
-              .$getTransform((style, prop, trans) => (transform = trans))
-              .$setTransform('none')
-              .$setTransformOrigin('top left')
-            initRect = this.getBoundingClientRectAbsolute(cell)
-            this.drawOverlayGrid(body, grid, cell)
-          })
-      })
-      .on('resizemove', event => {
-        __(event.target)
-          .$getStyle((cell, prop, style) => {
-            // @ts-ignore
-            style.$setTransform(`scale(${parseFloat(event.rect.width / initRect.width).toFixed(3)}, ${parseFloat(event.rect.height / initRect.height).toFixed(3)})`)
-          })
-      })
-      .on('resizeend', event => {
-        __(event.target)
-          .$getStyle((cell, prop, style) => {
-            const cellRect = this.getBoundingClientRectAbsolute(cell)
-            const singleCellRect = this.getCellRect(cell, initRect)
-            style
-              .$setGridRowEnd(`span ${Math.round(cellRect.height / singleCellRect.height)}`)
-              .$setGridColumnEnd(`span ${Math.round(cellRect.width / singleCellRect.width)}`)
-              .$setTransform(transform)
-            cell.classList.add('resized')
-            this.removeOverlayGrid(body)
-          })
-      })
-      .on('doubletap', event => {
-        // TODO: whole zindex stuff
-        // zIndex swapping
-        __(event.target)
-          .$getStyle((cell, prop, style) => {
-            const zIndex = Number(style.$getZIndex())
-            style.$setZIndex(!zIndex || zIndex === 1 ? this.defaultZIndex - 1 : zIndex - 1)
-          })
-      })
+  /**
+   * gives an array of HTMLElements back
+   *
+   * @readonly
+   * @returns { HTMLElement[] }
+   */
+  get gridChildTypes () {
+    return Array.from(this.grid.children).reduce((acc, child) => child.tagName && !acc.includes(child.tagName) ? acc.concat([child.tagName]) : acc, []).join(',') || '*'
   }
 }
