@@ -1,5 +1,6 @@
 // @ts-nocheck
 /**
+ * @typedef { import("./typesCalcsDraws").ProxifyElement } ProxifyElement
  * @typedef { import("./Helper/typesCalcsDraws").ProxifyHook } ProxifyHook
  * @typedef { import("./Helper/typesCalcsDraws").Interact } Interact
  */
@@ -56,7 +57,7 @@ export default class CssGrid extends SharedShadow() {
         // init all needed functionality
         this.drag = new Drag(__, this.interact, this.root)
         this.resize = new Resize(__, this.interact, this.root, this.minSizeColumn, this.minSizeRow)
-        this.doubletap = new Doubletap(__, this.interact, this.root, this.defaultZIndex)
+        this.doubletap = new Doubletap(__, this.interact, this.defaultZIndex)
       } else {
         console.error('SST: Can\'t find interact at global scope!!!', error)
       }
@@ -116,13 +117,19 @@ export default class CssGrid extends SharedShadow() {
       `
     ).$setClassName('mandatoryStyle')
 
-    // grid
+    /**
+     * grid container, which contains all grid elements
+     * @type { ProxifyElement }
+     */
     this.grid = __('section').$setClassName('grid')
-    // body
+    /**
+     * Document Body
+     * @type { ProxifyElement }
+     */
     this.body = __(document.body)
 
     // move children to grid
-    __(this.grid).$appendChildren(Array.from(this.childNodes))
+    this.grid.$appendChildren(Array.from(this.childNodes))
     __(this.root).$appendChildren([customStyle, mandatoryStyle, this.grid])
   }
 

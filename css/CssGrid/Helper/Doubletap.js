@@ -10,14 +10,12 @@ export default class Doubletap {
    *Creates an instance of Doubletap.
    * @param { ProxifyHook } proxifyHook
    * @param { Interact } interact
-   * @param { HTMLElement } root
    * @param { number } defaultZIndex
    * @memberof Doubletap
    */
-  constructor (proxifyHook, interact, root, defaultZIndex) {
+  constructor (proxifyHook, interact, defaultZIndex) {
     this.proxifyHook = proxifyHook
     this.interact = interact
-    this.root = root
     this.defaultZIndex = defaultZIndex
   }
 
