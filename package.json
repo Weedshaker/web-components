@@ -22,5 +22,6 @@
   "homepage": "https://github.com/Weedshaker/web-components#readme",
   "devDependencies": {
     "standard": "*"
-  }
+  },
+  "dependencies": {}
 }

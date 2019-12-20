@@ -30,6 +30,7 @@ const __ = new ProxifyHook(Events(Html(WebWorkers(Chain(Proxify()))))).get()
 // fetchOptions: string = "{'mode': 'same-origin'}"
 // lazy:boolean = (default "false")
 export default class FetchContainer extends SharedFetch {
+  // attributeChangedCallback - Note: only attributes listed in the observedAttributes property will receive this callback.
   static get observedAttributes () { return ['content'] }
   constructor (...args) {
     super(...args)
