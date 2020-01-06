@@ -1,18 +1,18 @@
 // @ts-check
 /**
- * @typedef { import("./typesCalcsDraws").ProxifyElement } ProxifyElement
- * @typedef { import("./typesCalcsDraws").ProxifyHook } ProxifyHook
- * @typedef { import("./typesCalcsDraws").Interact } Interact
+ * @typedef { import("../Helper/typesCalcs").ProxifyElement } ProxifyElement
+ * @typedef { import("../Helper/typesCalcs").ProxifyHook } ProxifyHook
+ * @typedef { import("../Helper/typesCalcs").Interact } Interact
  */
 
-import { getBoundingClientRectAbsolute, drawOverlayGrid, removeOverlayGrid, getCellRect } from './typesCalcsDraws.js'
+import { getBoundingClientRectAbsolute, getCellRect } from '../Helper/typesCalcs.js'
+import { drawOverlayGrid, removeOverlayGrid } from '../Helper/overlayGrid.js'
 
 export default class Resize {
   /**
-   *Creates an instance of Resize.
+   * Creates an instance of Resize, which interaction is used to drag and resize the cells within the grid
    * @param { ProxifyHook } proxifyHook
    * @param { Interact } interact
-   * @param { HTMLElement } root
    * @param { number } [minSizeColumn = 100]
    * @param { number } [minSizeRow = 100]
    * @memberof Resize
@@ -20,7 +20,6 @@ export default class Resize {
   constructor (proxifyHook, interact, root, minSizeColumn = 100, minSizeRow = 100) {
     this.proxifyHook = proxifyHook
     this.interact = interact
-    this.root = root
     this.minSizeColumn = minSizeColumn
     this.minSizeRow = minSizeRow
   }
@@ -29,11 +28,12 @@ export default class Resize {
    * start with Resizing
    *
    * @param { ProxifyElement } grid
-   * @param { ProxifyElement } body
    * @param { HTMLElement[] } selector
+   * @param { HTMLElement } gridParent
+   * @param { ProxifyElement } body
    * @returns { * }
    */
-  start (grid, body, selector) {
+  start (grid, selector, gridParent, body) {
     const __ = this.proxifyHook
     /** @type { string } */
     let transform // keep last transform value on style
@@ -52,7 +52,7 @@ export default class Resize {
           min: { width: this.minSizeColumn, height: this.minSizeRow }
         }
       })
-      .on('resizestart', event => {
+      .on('resizestart', event =>
         __(event.target)
           .$getStyle((cell, prop, style) => {
             style
@@ -60,19 +60,19 @@ export default class Resize {
               .$setTransform('none')
               .$setTransformOrigin('top left')
             initRect = getBoundingClientRectAbsolute(cell)
-            const res = drawOverlayGrid(__, body, grid, this.root, cell)
+            const res = drawOverlayGrid(__, body, grid, gridParent, cell)
             overlayGrid = res[0]
             bodyOverflow = res[1]
           })
-      })
-      .on('resizemove', event => {
+      )
+      .on('resizemove', event =>
         __(event.target)
           .$getStyle((cell, prop, style) => {
             // @ts-ignore
             style.$setTransform(`scale(${parseFloat(event.rect.width / initRect.width).toFixed(3)}, ${parseFloat(event.rect.height / initRect.height).toFixed(3)})`)
           })
-      })
-      .on('resizeend', event => {
+      )
+      .on('resizeend', event =>
         __(event.target)
           .$getStyle((cell, prop, style) => {
             const cellRect = getBoundingClientRectAbsolute(cell)
@@ -84,6 +84,6 @@ export default class Resize {
             cell.classList.add('resized')
             removeOverlayGrid(body, overlayGrid, bodyOverflow)
           })
-      })
+      )
   }
 }

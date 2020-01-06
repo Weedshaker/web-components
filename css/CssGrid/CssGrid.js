@@ -1,8 +1,8 @@
 // @ts-nocheck
 /**
- * @typedef { import("./typesCalcsDraws").ProxifyElement } ProxifyElement
- * @typedef { import("./Helper/typesCalcsDraws").ProxifyHook } ProxifyHook
- * @typedef { import("./Helper/typesCalcsDraws").Interact } Interact
+ * @typedef { import("./Helper/typesCalcs").ProxifyElement } ProxifyElement
+ * @typedef { import("./Helper/typesCalcs").ProxifyHook } ProxifyHook
+ * @typedef { import("./Helper/typesCalcs").Interact } Interact
  */
 
 /* global self */
@@ -13,9 +13,9 @@ import { ProxifyHook } from '../../proxifyjs/JavaScript/Classes/Helper/ProxifyHo
 import { Proxify } from '../../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
 import { Chain } from '../../proxifyjs/JavaScript/Classes/Traps/Misc/Chain.js'
 import { Html } from '../../proxifyjs/JavaScript/Classes/Traps/Dom/Html.js'
-import Drag from './Helper/Drag.js'
-import Resize from './Helper/Resize.js'
-import Doubletap from './Helper/Doubletap.js'
+import Drag from './Gesture/Drag.js'
+import Resize from './Gesture/Resize.js'
+import Doubletap from './Gesture/Doubletap.js'
 
 /** @type { ProxifyHook } */
 const __ = new ProxifyHook(Html(Chain(Proxify()))).get()
@@ -55,8 +55,8 @@ export default class CssGrid extends SharedShadow() {
         /** @type { Interact } */
         this.interact = self.interact
         // init all needed functionality
-        this.drag = new Drag(__, this.interact, this.root)
-        this.resize = new Resize(__, this.interact, this.root, this.minSizeColumn, this.minSizeRow)
+        this.drag = new Drag(__, this.interact)
+        this.resize = new Resize(__, this.interact, this.minSizeColumn, this.minSizeRow)
         this.doubletap = new Doubletap(__, this.interact, this.defaultZIndex)
       } else {
         console.error('SST: Can\'t find interact at global scope!!!', error)
@@ -139,9 +139,9 @@ export default class CssGrid extends SharedShadow() {
     // check if this.interact is a promise
     if ('then' in this.interact) {
       this.interact.then(() => {
-        this.drag.start(this.grid, this.body, this.gridChildTypes)
-        this.resize.start(this.grid, this.body, this.gridChildTypes)
-        this.doubletap.start(this.grid, this.gridChildTypes)
+        console.log('drag', this.drag.start(this.grid, this.gridChildTypes, this.root, this.body))
+        console.log('resize', this.resize.start(this.grid, this.gridChildTypes, this.root, this.body))
+        console.log('doubletap', this.doubletap.start(this.grid, this.gridChildTypes))
       })
     } else {
       this.drag.start(this.grid, this.body, this.gridChildTypes)

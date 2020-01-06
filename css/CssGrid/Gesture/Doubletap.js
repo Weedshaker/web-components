@@ -1,13 +1,13 @@
 // @ts-check
 /**
- * @typedef { import("./typesCalcsDraws").ProxifyElement } ProxifyElement
- * @typedef { import("./typesCalcsDraws").ProxifyHook } ProxifyHook
- * @typedef { import("./typesCalcsDraws").Interact } Interact
+ * @typedef { import("../Helper/typesCalcs").ProxifyElement } ProxifyElement
+ * @typedef { import("../Helper/typesCalcs").ProxifyHook } ProxifyHook
+ * @typedef { import("../Helper/typesCalcs").Interact } Interact
  */
 
 export default class Doubletap {
   /**
-   *Creates an instance of Doubletap.
+   * Creates an instance of Doubletap, which interaction is used to change the z-index
    * @param { ProxifyHook } proxifyHook
    * @param { Interact } interact
    * @param { number } defaultZIndex
@@ -29,7 +29,7 @@ export default class Doubletap {
   start (grid, selector) {
     const __ = this.proxifyHook
     return this.interact(selector, { context: grid.__raw__ || grid })
-      .on('doubletap', event => {
+      .on('doubletap', event =>
       // TODO: whole zindex stuff
       // zIndex swapping
         __(event.target)
@@ -37,6 +37,6 @@ export default class Doubletap {
             const zIndex = Number(style.$getZIndex())
             style.$setZIndex(!zIndex || zIndex === 1 ? this.defaultZIndex - 1 : zIndex - 1)
           })
-      })
+      )
   }
 }

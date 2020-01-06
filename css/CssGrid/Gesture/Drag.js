@@ -1,36 +1,36 @@
 // @ts-check
 /**
- * @typedef { import("./typesCalcsDraws").ProxifyElement } ProxifyElement
- * @typedef { import("./typesCalcsDraws").ProxifyHook } ProxifyHook
- * @typedef { import("./typesCalcsDraws").Interact } Interact
- * @typedef { import("./typesCalcsDraws").XY } XY
+ * @typedef { import("../Helper/typesCalcs").ProxifyElement } ProxifyElement
+ * @typedef { import("../Helper/typesCalcs").ProxifyHook } ProxifyHook
+ * @typedef { import("../Helper/typesCalcs").Interact } Interact
+ * @typedef { import("../Helper/typesCalcs").XY } XY
  */
 
-import { calcPoint, drawOverlayGrid, removeOverlayGrid } from './typesCalcsDraws.js'
+import { calcPoint } from '../Helper/typesCalcs.js'
+import { drawOverlayGrid, removeOverlayGrid } from '../Helper/overlayGrid.js'
 
 export default class Drag {
   /**
-   *Creates an instance of Drag.
+   * Creates an instance of Drag, which interaction is used to drag and place the cells within the grid
    * @param { ProxifyHook } proxifyHook
    * @param { Interact } interact
-   * @param { HTMLElement } root
    * @memberof Drag
    */
-  constructor (proxifyHook, interact, root) {
+  constructor (proxifyHook, interact) {
     this.proxifyHook = proxifyHook
     this.interact = interact
-    this.root = root
   }
 
   /**
    * start with dragging
    *
    * @param { ProxifyElement } grid
-   * @param { ProxifyElement } body
    * @param { HTMLElement[] } selector
+   * @param { HTMLElement } gridParent
+   * @param { ProxifyElement } body
    * @returns { * }
    */
-  start (grid, body, selector) {
+  start (grid, selector, gridParent, body) {
     const __ = this.proxifyHook
     /** @type { string } */
     let transform // keep last transform value on style
@@ -44,7 +44,7 @@ export default class Drag {
       .draggable({
         autoScroll: true,
         inertia: true, // Inertia allows drag and resize actions to continue after the user releases the pointer at a fast enough speed. http://interactjs.io/docs/inertia/
-        onstart: event => {
+        onstart: event =>
           __(event.target)
             .$getStyle((cell, prop, style) => {
               style
@@ -53,20 +53,18 @@ export default class Drag {
                 .$setTransform('none')
                 // calculate the dragPoint within the cell, this is important for cells which span more than one grid fraction
               dragPoint = calcPoint(cell, cell, [event.pageX, event.pageY], 'floor')
-              const res = drawOverlayGrid(__, body, grid, this.root, cell)
+              const res = drawOverlayGrid(__, body, grid, gridParent, cell)
               overlayGrid = res[0]
               bodyOverflow = res[1]
-            })
-        },
-        onmove: event => {
+            }),
+        onmove: event =>
           // move cell with mouse by translate x, y
           __(event.target)
             .$getStyle((cell, prop, style) => {
               const [, x, y] = style.transform.match(/.*?\(([-0-9]*)[^0-9-]*([-0-9]*)/) || ['', 0, 0]
               style.$setTransform(`translate(${Math.round(Number(x) + event.dx)}px, ${Math.round(Number(y) + event.dy)}px)`)
-            })
-        },
-        onend: event => {
+            }),
+        onend: event =>
           __(event.target)
             .$getStyle((cell, prop, style) => {
               // reset translate, otherwise cell coordinates will be off
@@ -81,7 +79,6 @@ export default class Drag {
               cell.classList.add('dragged')
               removeOverlayGrid(body, overlayGrid, bodyOverflow)
             })
-        }
       })
   }
 }
