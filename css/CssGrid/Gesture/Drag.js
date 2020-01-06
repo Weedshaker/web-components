@@ -3,7 +3,7 @@
  * @typedef { import("../Helper/typesCalcs").ProxifyElement } ProxifyElement
  * @typedef { import("../Helper/typesCalcs").ProxifyHook } ProxifyHook
  * @typedef { import("../Helper/typesCalcs").Interact } Interact
- * @typedef { import("../Helper/typesCalcs").XY } XY
+ * @typedef { import("../Helper/typesCalcs").ColumnRow } ColumnRow
  */
 
 import { calcPoint } from '../Helper/typesCalcs.js'
@@ -38,8 +38,8 @@ export default class Drag {
     let overlayGrid // keep last overlayGrid ProxifyElement ref
     /** @type { string } */
     let bodyOverflow // keep last overflow of body
-    /** @type { XY } */
-    let dragPoint = [0, 0] // [row, column] started at first click within the target cell, to figure at which fraction within the target cell got clicked, since a cell can span multiple fractions
+    /** @type { ColumnRow } */
+    let dragPoint = [0, 0] // [column, row] started at first click within the target cell, to figure at which fraction within the target cell got clicked, since a cell can span multiple fractions
     return this.interact(selector, { context: grid.__raw__ || grid })
       .draggable({
         autoScroll: true,

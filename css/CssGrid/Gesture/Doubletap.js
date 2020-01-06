@@ -5,6 +5,8 @@
  * @typedef { import("../Helper/typesCalcs").Interact } Interact
  */
 
+import { calcPoint } from '../Helper/typesCalcs.js'
+
 export default class Doubletap {
   /**
    * Creates an instance of Doubletap, which interaction is used to change the z-index
@@ -34,6 +36,8 @@ export default class Doubletap {
       // zIndex swapping
         __(event.target)
           .$getStyle((cell, prop, style) => {
+            // different cells wont work, since it works with the coordinates
+            // Array.from(grid.children).forEach(child => console.log('zindex', child, calcPoint(grid, child, [event.pageX, event.pageY], 'ceil')))
             const zIndex = Number(style.$getZIndex())
             style.$setZIndex(!zIndex || zIndex === 1 ? this.defaultZIndex - 1 : zIndex - 1)
           })

@@ -83,8 +83,8 @@ export default class CssGrid extends SharedShadow() {
     const host = this.shadow ? ':host' : this.nodeName // host: only works if shadow active
     this.minSizeColumn = Number(this.getAttribute('minSizeColumn')) || 100
     this.minSizeRow = Number(this.getAttribute('minSizeRow')) || 100
+    // optional styles
     const customStyle = __('style').$setTextContent((this.getAttribute('customStyle') || '').replace(/\${host}/g, host) ||
-      // optional styles
       `
         ${host} {
           --overlay-grid-border: 1px dashed rgba(148, 0, 255, .6);
@@ -98,8 +98,8 @@ export default class CssGrid extends SharedShadow() {
         }
       `
     ).$setClassName('customStyle')
+    // must have styles
     const mandatoryStyle = __('style').$setTextContent(
-      // must have styles
       `
         ${host} > section.grid {
           display: grid;
@@ -110,12 +110,19 @@ export default class CssGrid extends SharedShadow() {
         }
         ${host} > section.grid > * {
           box-sizing: border-box;
-          touch-action: none;
-          user-select: none;
           z-index: ${this.defaultZIndex};
         }
       `
     ).$setClassName('mandatoryStyle')
+    // must have styles when active
+    const activeStyle = __('style').$setTextContent(
+      `
+        ${host} > section.grid > * {
+          touch-action: none;
+          user-select: none;
+        }
+      `
+    ).$setClassName('activeStyle')
 
     /**
      * grid container, which contains all grid elements
@@ -130,7 +137,7 @@ export default class CssGrid extends SharedShadow() {
 
     // move children to grid
     this.grid.$appendChildren(Array.from(this.childNodes))
-    __(this.root).$appendChildren([customStyle, mandatoryStyle, this.grid])
+    __(this.root).$appendChildren([customStyle, mandatoryStyle, activeStyle, this.grid])
   }
 
   connectedCallback () {
