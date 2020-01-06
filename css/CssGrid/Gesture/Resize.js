@@ -84,6 +84,6 @@ export default class Resize {
     }
     return this.interact(selector, { context: grid.__raw__ || grid })
       .resizable(config) // desktop
-      .gesturable(config) // touchscreen
+      // TODO (https://interactjs.io/docs/api/Interactable.html#gesturable + take in account touch-action: none): .gesturable(config) // touchscreen
   }
 }

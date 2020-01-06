@@ -4,6 +4,7 @@
  * @typedef { (HTMLElement)=>ProxifyElement } ProxifyHook
  * @typedef { ([], {context})=>* & { version: string} } Interact
  * @typedef { [number, number] } XY
+ * @typedef { [number, number] } ColumnRow
  */
 
 /* global self */
@@ -15,7 +16,7 @@
  * @param { ProxifyElement } cell
  * @param { XY } cors
  * @param { string } [mathFunc='ceil']
- * @returns { XY }
+ * @returns { ColumnRow }
  */
 export const calcPoint = (grid, cell, cors, mathFunc = 'ceil') => {
   const gridRect = getBoundingClientRectAbsolute(grid)
