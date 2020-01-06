@@ -1,4 +1,9 @@
 // @ts-nocheck
+/**
+ * @typedef { import("./Helper/typesCalcs").ProxifyElement } ProxifyElement
+ * @typedef { import("./Helper/typesCalcs").ProxifyHook } ProxifyHook
+ * @typedef { import("./Helper/typesCalcs").Interact } Interact
+ */
 
 /* global self */
 /* global MutationObserver */
@@ -8,11 +13,11 @@ import { ProxifyHook } from '../../proxifyjs/JavaScript/Classes/Helper/ProxifyHo
 import { Proxify } from '../../proxifyjs/JavaScript/Classes/Handler/Proxify.js'
 import { Chain } from '../../proxifyjs/JavaScript/Classes/Traps/Misc/Chain.js'
 import { Html } from '../../proxifyjs/JavaScript/Classes/Traps/Dom/Html.js'
-import Drag from './Helper/Drag.js'
-import Resize from './Helper/Resize.js'
-import Doubletap from './Helper/Doubletap.js'
+import Drag from './Gesture/Drag.js'
+import Resize from './Gesture/Resize.js'
+import Doubletap from './Gesture/Doubletap.js'
 
-// @ts-ignore
+/** @type { ProxifyHook } */
 const __ = new ProxifyHook(Html(Chain(Proxify()))).get()
 
 /**
@@ -46,19 +51,17 @@ export default class CssGrid extends SharedShadow() {
 
     // load interact.js
     const interactLoaded = error => {
-      // @ts-ignore
       if (!error && typeof self.interact === 'function' && self.interact.version) {
-        // @ts-ignore
+        /** @type { Interact } */
         this.interact = self.interact
         // init all needed functionality
-        this.drag = new Drag(__, this.interact, this.root)
-        this.resize = new Resize(__, this.interact, this.root, this.minSizeColumn, this.minSizeRow)
-        this.doubletap = new Doubletap(__, this.interact, this.root, this.defaultZIndex)
+        this.drag = new Drag(__, this.interact)
+        this.resize = new Resize(__, this.interact, this.minSizeColumn, this.minSizeRow)
+        this.doubletap = new Doubletap(__, this.interact, this.defaultZIndex)
       } else {
         console.error('SST: Can\'t find interact at global scope!!!', error)
       }
     }
-    // @ts-ignore
     if (!self.interact) {
       // interact.js has no transpiled release/dist version in the repo but typescript. This makes it unsuitable to use it as a submodule, hence using jsdelivr
       this.interact = import('https://cdn.jsdelivr.net/npm/interactjs@1.7.2/dist/interact.min.js').then(module => interactLoaded()).catch(error => interactLoaded(error))
@@ -114,13 +117,19 @@ export default class CssGrid extends SharedShadow() {
       `
     ).$setClassName('mandatoryStyle')
 
-    // grid
+    /**
+     * grid container, which contains all grid elements
+     * @type { ProxifyElement }
+     */
     this.grid = __('section').$setClassName('grid')
-    // body
+    /**
+     * Document Body
+     * @type { ProxifyElement }
+     */
     this.body = __(document.body)
 
     // move children to grid
-    __(this.grid).$appendChildren(Array.from(this.childNodes))
+    this.grid.$appendChildren(Array.from(this.childNodes))
     __(this.root).$appendChildren([customStyle, mandatoryStyle, this.grid])
   }
 
@@ -130,9 +139,9 @@ export default class CssGrid extends SharedShadow() {
     // check if this.interact is a promise
     if ('then' in this.interact) {
       this.interact.then(() => {
-        this.drag.start(this.grid, this.body, this.gridChildTypes)
-        this.resize.start(this.grid, this.body, this.gridChildTypes)
-        this.doubletap.start(this.grid, this.gridChildTypes)
+        console.log('drag', this.drag.start(this.grid, this.gridChildTypes, this.root, this.body))
+        console.log('resize', this.resize.start(this.grid, this.gridChildTypes, this.root, this.body))
+        console.log('doubletap', this.doubletap.start(this.grid, this.gridChildTypes))
       })
     } else {
       this.drag.start(this.grid, this.body, this.gridChildTypes)
