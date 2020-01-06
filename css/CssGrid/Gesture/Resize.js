@@ -43,16 +43,15 @@ export default class Resize {
     let bodyOverflow // keep last overflow of body
     /** @type { ClientRect } */
     let initRect // resizing initial rect
-    return this.interact(selector, { context: grid.__raw__ || grid })
-      .resizable({
-        autoScroll: true,
-        edges: { left: false, right: true, bottom: true, top: false },
-        inertia: true, // Inertia allows drag and resize actions to continue after the user releases the pointer at a fast enough speed. http://interactjs.io/docs/inertia/
-        restrictSize: {
-          min: { width: this.minSizeColumn, height: this.minSizeRow }
-        }
-      })
-      .on('resizestart', event =>
+    // the config with events for interact resize and gesture
+    const config = {
+      autoScroll: true,
+      edges: { left: false, right: true, bottom: true, top: false },
+      inertia: true, // Inertia allows drag and resize actions to continue after the user releases the pointer at a fast enough speed. http://interactjs.io/docs/inertia/
+      restrictSize: {
+        min: { width: this.minSizeColumn, height: this.minSizeRow }
+      },
+      onstart: event =>
         __(event.target)
           .$getStyle((cell, prop, style) => {
             style
@@ -63,16 +62,14 @@ export default class Resize {
             const res = drawOverlayGrid(__, body, grid, gridParent, cell)
             overlayGrid = res[0]
             bodyOverflow = res[1]
-          })
-      )
-      .on('resizemove', event =>
+          }),
+      onmove: event =>
         __(event.target)
           .$getStyle((cell, prop, style) => {
             // @ts-ignore
             style.$setTransform(`scale(${parseFloat(event.rect.width / initRect.width).toFixed(3)}, ${parseFloat(event.rect.height / initRect.height).toFixed(3)})`)
-          })
-      )
-      .on('resizeend', event =>
+          }),
+      onend: event =>
         __(event.target)
           .$getStyle((cell, prop, style) => {
             const cellRect = getBoundingClientRectAbsolute(cell)
@@ -84,6 +81,9 @@ export default class Resize {
             cell.classList.add('resized')
             removeOverlayGrid(body, overlayGrid, bodyOverflow)
           })
-      )
+    }
+    return this.interact(selector, { context: grid.__raw__ || grid })
+      .resizable(config) // desktop
+      .gesturable(config) // touchscreen
   }
 }
