@@ -18,7 +18,7 @@
  * @param { string } [mathFunc='ceil']
  * @returns { ColumnRow }
  */
-export const calcPoint = (grid, cell, cors, mathFunc = 'ceil') => {
+export const getColumnRow = (grid, cell, cors, mathFunc = 'ceil') => {
   const gridRect = getBoundingClientRectAbsolute(grid)
   const cellRect = getCellRect(cell)
   const [x, y] = [cors[0] - gridRect.left, cors[1] - gridRect.top]
@@ -60,4 +60,33 @@ export const getBoundingClientRectAbsolute = (node) => {
   // @ts-ignore
   const rect = node.getBoundingClientRect().toJSON()
   return Object.assign(rect, { top: rect.top + self.scrollY, right: rect.right + self.scrollX, bottom: rect.bottom + self.scrollY, left: rect.left + self.scrollX })
+}
+
+/**
+ * calculates if nodeA intersects with nodeB
+ *
+ * @param { Element } nodeA
+ * @param { Element } nodeB
+ * @returns { Boolean }
+ */
+export const nodeIntersects = (nodeA, nodeB) => {
+  /**
+   * enriches the rect with the center of a node
+   *
+   * @param { DOMRect } rect
+   * @returns { { centerX: number, centerY: number} & DOMRect }
+   */
+  const addCenter = (rect) => Object.assign(
+    rect,
+    {
+      centerX: rect.x + rect.width / 2,
+      centerY: rect.y + rect.height / 2
+    }
+  )
+  // @ts-ignore
+  const rectA = addCenter(nodeA.getBoundingClientRect().toJSON())
+  // @ts-ignore
+  const rectB = addCenter(nodeB.getBoundingClientRect().toJSON())
+  // actual calculation
+  return Math.abs(rectA.centerX - rectB.centerX) - (rectA.width + rectB.width) / 2 < 0 && Math.abs(rectA.centerY - rectB.centerY) - (rectA.height + rectB.height) / 2 < 0
 }

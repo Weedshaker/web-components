@@ -5,7 +5,7 @@
  * @typedef { import("../Helper/typesCalcs").Interact } Interact
  */
 
-import { calcPoint } from '../Helper/typesCalcs.js'
+import { nodeIntersects } from '../Helper/typesCalcs.js'
 
 export default class Doubletap {
   /**
@@ -36,8 +36,7 @@ export default class Doubletap {
       // zIndex swapping
         __(event.target)
           .$getStyle((cell, prop, style) => {
-            // different cells wont work, since it works with the coordinates
-            // Array.from(grid.children).forEach(child => console.log('zindex', child, calcPoint(grid, child, [event.pageX, event.pageY], 'ceil')))
+            console.log('intersecting', Array.from(grid.children).filter(child => cell !== child && nodeIntersects(cell, child)))
             const zIndex = Number(style.$getZIndex())
             style.$setZIndex(!zIndex || zIndex === 1 ? this.defaultZIndex - 1 : zIndex - 1)
           })

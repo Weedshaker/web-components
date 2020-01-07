@@ -6,7 +6,7 @@
  * @typedef { import("../Helper/typesCalcs").ColumnRow } ColumnRow
  */
 
-import { calcPoint } from '../Helper/typesCalcs.js'
+import { getColumnRow } from '../Helper/typesCalcs.js'
 import { drawOverlayGrid, removeOverlayGrid } from '../Helper/overlayGrid.js'
 
 export default class Drag {
@@ -52,7 +52,7 @@ export default class Drag {
                 .$getTransform((style, prop, trans) => (transform = trans || 'none'))
                 .$setTransform('none')
                 // calculate the dragPoint within the cell, this is important for cells which span more than one grid fraction
-              dragPoint = calcPoint(cell, cell, [event.pageX, event.pageY], 'floor')
+              dragPoint = getColumnRow(cell, cell, [event.pageX, event.pageY], 'floor')
               const res = drawOverlayGrid(__, body, grid, gridParent, cell)
               overlayGrid = res[0]
               bodyOverflow = res[1]
@@ -70,7 +70,7 @@ export default class Drag {
               // reset translate, otherwise cell coordinates will be off
               style.$setTransform('none')
               // calculate the dropPoint within the grid
-              const dropPoint = calcPoint(grid, cell, [event.pageX, event.pageY], 'ceil')
+              const dropPoint = getColumnRow(grid, cell, [event.pageX, event.pageY], 'ceil')
               // set grid inline style
               style
                 .$setGridRowStart(dropPoint[1] - dragPoint[1] > 0 ? dropPoint[1] - dragPoint[1] : 1)
