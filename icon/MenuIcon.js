@@ -19,7 +19,7 @@ export default class MenuIcon extends SharedShadow() {
     this.height = this.getAttribute('height') ? this.getAttribute('height') : '5px'
     this.openClass = this.getAttribute('openClass') ? this.getAttribute('openClass') : 'open'
     this.barClass = this.getAttribute('barClass') ? this.getAttribute('barClass') : 'bar'
-    this.transition = this.getAttribute('transition') ? this.getAttribute('transition') : '0.4s'
+    this.transition = this.getAttribute('transition') ? this.getAttribute('transition') : '0.2s'
     this.root.innerHTML = `
     <style>
       :host {
@@ -61,6 +61,7 @@ export default class MenuIcon extends SharedShadow() {
     <div class="${this.barClass}3"></div>
     `
     this.addEventListener('click', this.toggleAnimationClass.bind(this))
+    window.addEventListener('hashchange', this.toggleAnimationClass.bind(this))
     if (localStorage.getItem(`MenuIcon_${this.openClass}`) === 'true') this.toggleAnimationClass()
   }
 
