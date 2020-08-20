@@ -61,12 +61,19 @@ export default class MenuIcon extends SharedShadow() {
     <div class="${this.barClass}3"></div>
     `
     this.addEventListener('click', this.toggleAnimationClass.bind(this))
-    window.addEventListener('hashchange', this.toggleAnimationClass.bind(this))
-    if (localStorage.getItem(`MenuIcon_${this.openClass}`) === 'true') this.toggleAnimationClass()
+    let lastHash = location.hash
+    window.addEventListener('hashchange', () => {
+      if (lastHash !== location.hash) {
+        this.toggleAnimationClass('remove')
+      } else {
+        this.toggleAnimationClass(localStorage.getItem(`MenuIcon_${this.openClass}`) === 'true' ? 'add' : 'remove')
+      }
+      lastHash = location.hash
+    })
   }
 
-  toggleAnimationClass () {
-    this.classList.toggle(this.openClass)
+  toggleAnimationClass (command = 'toggle') {
+    this.classList[command](this.openClass)
     if (this.querySelected) this.querySelected.classList[this.classList.contains(this.openClass) ? 'add' : 'remove'](this.openClass)
     localStorage.setItem(`MenuIcon_${this.openClass}`, `${this.classList.contains(this.openClass)}`)
   }
